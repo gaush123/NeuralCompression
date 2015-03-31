@@ -366,13 +366,29 @@ layer {
   }
 }
 layer {
-  name: "accuracy"
+  name: "accuracy_top1"
   type: "Accuracy"
   bottom: "fc8"
   bottom: "label"
-  top: "accuracy"
+  top: "accuracy_top1"
+  accuracy_param {
+    top_k: 1;
+  }
   include {
-    phase: TEST
+    # phase: TEST
+  }
+}
+layer {
+  name: "accuracy_top5"
+  type: "Accuracy"
+  bottom: "fc8"
+  bottom: "label"
+  top: "accuracy_top5"
+  accuracy_param {
+    top_k: 5;
+  }
+  include {
+    # phase: TEST
   }
 }
 layer {
