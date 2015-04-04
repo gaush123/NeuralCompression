@@ -5,6 +5,7 @@
 #include "caffe/common.hpp"
 #include "caffe/syncedmem.hpp"
 #include "caffe/util/math_functions.hpp"
+#include <cstdio>
 
 namespace caffe {
 
@@ -29,10 +30,17 @@ void Blob<Dtype>::Reshape(const vector<int>& shape) {
     count_ *= shape[i];
     shape_[i] = shape[i];
   }
+  multiply_with_mask = false;
   if (count_ > capacity_) {
     capacity_ = count_;
     data_.reset(new SyncedMemory(capacity_ * sizeof(Dtype)));
     diff_.reset(new SyncedMemory(capacity_ * sizeof(Dtype)));
+    // Pruning: allocate mask_
+    mask_.reset(new SyncedMemory(capacity_ * sizeof(Dtype)));
+    Dtype* mask_vec = mutable_cpu_mask();
+    for (int i = 0; i < count_; ++i) {
+      mask_vec[i] = 1;
+    }
   }
 }
 
@@ -96,6 +104,20 @@ const Dtype* Blob<Dtype>::gpu_diff() const {
   return (const Dtype*)diff_->gpu_data();
 }
 
+//begin: add get for mask
+template <typename Dtype>
+const Dtype* Blob<Dtype>::cpu_mask() const {
+  CHECK(diff_);
+  return (const Dtype*)mask_->cpu_data();
+}
+template <typename Dtype>
+const Dtype* Blob<Dtype>::gpu_mask() const {
+  CHECK(diff_);
+  return (const Dtype*)mask_->gpu_data();
+}
+//end: add get for mask
+
+
 template <typename Dtype>
 Dtype* Blob<Dtype>::mutable_cpu_data() {
   CHECK(data_);
@@ -120,6 +142,20 @@ Dtype* Blob<Dtype>::mutable_gpu_diff() {
   return static_cast<Dtype*>(diff_->mutable_gpu_data());
 }
 
+//begin: added mutable get for mask
+template <typename Dtype>
+Dtype* Blob<Dtype>::mutable_cpu_mask() {
+  CHECK(diff_);
+  return static_cast<Dtype*>(mask_->mutable_cpu_data());
+}
+template <typename Dtype>
+Dtype* Blob<Dtype>::mutable_gpu_mask() {
+  CHECK(diff_);
+  return static_cast<Dtype*>(mask_->mutable_gpu_data());
+}
+//end: added mutable get for mask
+
+
 template <typename Dtype>
 void Blob<Dtype>::ShareData(const Blob& other) {
   CHECK_EQ(count_, other.count());
@@ -132,6 +168,11 @@ void Blob<Dtype>::ShareDiff(const Blob& other) {
   diff_ = other.diff();
 }
 
+template <typename Dtype>
+void Blob<Dtype>::ShareMask(const Blob& other) {
+  CHECK_EQ(count_, other.count());
+  mask_ = other.mask();
+}
 // The "update" method is used for parameter blobs in a Net, which are stored
 // as Blob<float> or Blob<double> -- hence we do not define it for
 // Blob<int> or Blob<unsigned int>.
@@ -147,6 +188,12 @@ void Blob<Dtype>::Update() {
     caffe_axpy<Dtype>(count_, Dtype(-1),
         static_cast<const Dtype*>(diff_->cpu_data()),
         static_cast<Dtype*>(data_->mutable_cpu_data()));
+    //Pruning: multiply with mask
+    if  (multiply_with_mask){
+        caffe_mul(count_, static_cast<const Dtype*>(mask_->cpu_data()),
+                      static_cast<const Dtype*>(data_->cpu_data()),
+                      static_cast<Dtype*>(data_->mutable_cpu_data()));
+    }
     break;
   case SyncedMemory::HEAD_AT_GPU:
   case SyncedMemory::SYNCED:
@@ -155,6 +202,12 @@ void Blob<Dtype>::Update() {
     caffe_gpu_axpy<Dtype>(count_, Dtype(-1),
         static_cast<const Dtype*>(diff_->gpu_data()),
         static_cast<Dtype*>(data_->mutable_gpu_data()));
+    //Pruning: multiply with mask
+    if  (multiply_with_mask){
+        caffe_gpu_mul(count_, static_cast<const Dtype*>(mask_->gpu_data()),
+                          static_cast<const Dtype*>(data_->gpu_data()),
+                          static_cast<Dtype*>(data_->mutable_gpu_data()));
+    }
 #else
     NO_GPU;
 #endif
@@ -415,6 +468,10 @@ void Blob<Dtype>::CopyFrom(const Blob& source, bool copy_diff, bool reshape) {
       caffe_copy(count_, source.gpu_data(),
           static_cast<Dtype*>(data_->mutable_gpu_data()));
     }
+    // Pruning: copy the mask as well
+    caffe_copy(count_, source.gpu_mask(),
+          static_cast<Dtype*>(mask_->mutable_gpu_data()));
+
     break;
   case Caffe::CPU:
     if (copy_diff) {
@@ -424,6 +481,10 @@ void Blob<Dtype>::CopyFrom(const Blob& source, bool copy_diff, bool reshape) {
       caffe_copy(count_, source.cpu_data(),
           static_cast<Dtype*>(data_->mutable_cpu_data()));
     }
+    // Pruning: copythe mask as well??
+    caffe_copy(count_, source.cpu_mask(),
+          static_cast<Dtype*>(mask_->mutable_cpu_data()));
+
     break;
   default:
     LOG(FATAL) << "Unknown caffe mode.";
@@ -464,6 +525,28 @@ void Blob<Dtype>::FromProto(const BlobProto& proto, bool reshape) {
       diff_vec[i] = proto.diff(i);
     }
   }
+  // Pruning: here initialize the mask_ from the proto
+  // Pruning: remember to set mask to 1 if no mask is there at all
+  // if proto.mask_size == zero, then mask =1 here for myself
+  if (proto.mask_size() != 0){
+    printf("initialized from python, good for retraining, multiply with mask = true \n");
+    multiply_with_mask = true;
+    Dtype* mask_vec = mutable_cpu_mask();
+    for (int i = 0; i < count_; ++i) {
+      mask_vec[i] = proto.mask(i);
+    }
+  }
+  else {
+    printf("initialized to 1, NOT for retraining!  multiply_with_mask = false \n");
+    multiply_with_mask = false;
+    Dtype* mask_vec = mutable_cpu_mask();
+    for (int i = 0; i < count_; ++i) {
+      mask_vec[i] = 1;
+    }
+  }
+
+
+
 }
 
 template <typename Dtype>
@@ -483,6 +566,10 @@ void Blob<Dtype>::ToProto(BlobProto* proto, bool write_diff) const {
     for (int i = 0; i < count_; ++i) {
       proto->add_diff(diff_vec[i]);
     }
+  }
+  const Dtype* mask_vec = cpu_mask();
+  for (int i = 0; i < count_; ++i) {
+    proto->add_mask(mask_vec[i]);
   }
 }
 

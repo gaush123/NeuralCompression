@@ -25,7 +25,7 @@ template <typename Dtype>
 class Blob {
  public:
   Blob()
-       : data_(), diff_(), count_(0), capacity_(0) {}
+       : data_(), diff_(), mask_(), count_(0), capacity_(0) {}
 
   /// @brief Deprecated; use <code>Blob(const vector<int>& shape)</code>.
   explicit Blob(const int num, const int channels, const int height,
@@ -217,6 +217,11 @@ class Blob {
     return diff_;
   }
 
+  inline const shared_ptr<SyncedMemory>& mask() const {
+    CHECK(mask_);
+    return mask_;
+  }
+
   const Dtype* cpu_data() const;
   void set_cpu_data(Dtype* data);
   const Dtype* gpu_data() const;
@@ -226,6 +231,13 @@ class Blob {
   Dtype* mutable_gpu_data();
   Dtype* mutable_cpu_diff();
   Dtype* mutable_gpu_diff();
+  // define both gpu_mask and mutable_gpu_mask
+  // define both cpu_mask and mutable_cpu_mask
+  const Dtype* cpu_mask() const;
+  const Dtype* gpu_mask() const;
+  Dtype* mutable_cpu_mask();
+  Dtype* mutable_gpu_mask();
+
   void Update();
   void FromProto(const BlobProto& proto, bool reshape = true);
   void ToProto(BlobProto* proto, bool write_diff = false) const;
@@ -263,14 +275,19 @@ class Blob {
    */
   void ShareDiff(const Blob& other);
 
+  //Pruning: define share mask, alghough might not be used.
+  void ShareMask(const Blob& other);
+
   bool ShapeEquals(const BlobProto& other);
 
  protected:
   shared_ptr<SyncedMemory> data_;
   shared_ptr<SyncedMemory> diff_;
+  shared_ptr<SyncedMemory> mask_;
   vector<int> shape_;
   int count_;
   int capacity_;
+  bool multiply_with_mask;
 
   DISABLE_COPY_AND_ASSIGN(Blob);
 };  // class Blob
