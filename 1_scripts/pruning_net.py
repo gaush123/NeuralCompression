@@ -46,52 +46,28 @@ def analyze_param(net, layers):
 
 # options defined here:
 analyze_only = 0
-target = 'lenet_300_100'
-target = 'lenet5'
-target = 'cifar'
-target = 'imagenet'
+folder="/L1_3/"
 
-if target == 'lenet_300_100':
-    prototxt = caffe_root+'/mnist/pruning_lenet/lenet_300_100.prototxt'
-    caffemodel = caffe_root+'/mnist/pruning_lenet/lenet_best_weights.caffemodel'
-    net = caffe.Net(prototxt, caffemodel)
-    layers = ['ip1', 'ip2', 'ip3']
-    layers_tbd = ['ip1', 'ip2', 'ip3']
-elif target == 'lenet5':
-    prototxt = caffe_root+'/mnist/lenet.prototxt'
-    caffemodel = caffe_root+'/mnist/lenet_iter_10000.caffemodel'
-    net = caffe.Net(prototxt, caffemodel)
-    layers = ['conv1', 'conv2', 'ip1', 'ip2']
-    layers_tbd = ['ip1']
-    output_prefix = caffe_root+'/mnist/lenet5_pruned'
-elif target == 'cifar':
-    prototxt = caffe_root+'/examples/cifar10/cifar10_full.prototxt'
-    caffemodel = caffe_root+'/examples/cifar10/cifar10_full_iter_70000.caffemodel'
-    net = caffe.Net(prototxt, caffemodel, caffe.TEST)
-    layers = ['conv1', 'conv2', 'conv3', 'ip1']
-    layers_tbd = ['conv2', 'conv3', 'ip1']
-    output_prefix = caffe_root+'/examples/cifar10/cifar_full_pruned'
-elif target == 'imagenet':
-    prototxt = caffe_root+'/3_prototxt_solver/deploy.prototxt'
-    caffemodel = caffe_root+'/4_model_checkpoint/bvlc_alexnet.caffemodel'
-#   net = caffe.Net(prototxt, caffemodel, caffe.TEST)
-    layers = ['conv1', 'conv2', 'conv3', 'conv4', 'conv5', 'fc6', 'fc7', 'fc8']
-    layers_tbd = [ 'fc6', 'fc7', 'fc8']
-    output_prefix = caffe_root+'/4_model_checkpoint/1_before_retrain/alex_pruned_'
+prototxt = caffe_root+'/3_prototxt_solver/'+folder+'deploy.prototxt'
+caffemodel = caffe_root+'/4_model_checkpoint/0_original_dense/'+folder+'bvlc_alexnet_L1.caffemodel'
+caffemodel = caffe_root+'/4_model_checkpoint/0_original_dense/'+folder+'caffe_alexnet_train1_iter_1885000.caffemodel'
+# net = caffe.Net(prototxt, caffemodel, caffe.TEST)
+layers = ['conv1', 'conv2', 'conv3', 'conv4', 'conv5', 'fc6_new', 'fc7_new', 'fc8_new']
+layers_tbd = [ 'fc6_new', 'fc7_new', 'fc8_new']
+output_prefix = caffe_root+'/4_model_checkpoint/1_before_retrain/'+folder+'alex_pruned_'
+suffix = '_678half.caffemodel'
+threshold_list = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2.0, 2.1, 2.2, 2.3]
+fout = open(caffe_root+'/2_results/'+folder+'parameter_cnt_678half.csv', 'w')
 
 
-
+numBins = 2 ^ 8
 if analyze_only:
     analyze_param(net, layers)
     sys.exit(0)
 
+
 num_cores = multiprocessing.cpu_count()
 print "num_cores = %d" % num_cores
-numBins = 2 ^ 8
-threshold_list = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2.0, 2.1, 2.2, 2.3]
-fout = open(caffe_root+'/2_results/parameter_cnt_678half.csv', 'w')
-suffix = '_678half.caffemodel'
-
 def prune(threshold):
     global prototxt, caffemodel, output_prefix, layers, layers_tbd
     net = caffe.Net(prototxt, caffemodel, caffe.TEST)
@@ -102,7 +78,7 @@ def prune(threshold):
         #     hi = np.max(np.abs(W.flatten()))
         hi = np.std(W.flatten())
         mask = (np.abs(W) > (hi * threshold))
-        if layer == 'fc8':
+        if layer == 'fc8_new':
             mask = (np.abs(W) > (hi * threshold / 2))
         mask = np.bool_(mask)
         W = W * mask
@@ -124,7 +100,7 @@ results = Parallel(n_jobs=num_cores)(delayed(prune)(threshold) for threshold in 
 
 print results
 for (threshold, percentage) in results:
-    fout.write("%4.1f, %.4f\n" % (threshold, percentage))
+    fout.write("%4.1f, %.4f, \n" % (threshold, percentage))
 fout.close()
 sys.exit(0)
 

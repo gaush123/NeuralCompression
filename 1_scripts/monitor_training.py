@@ -4,7 +4,7 @@ from matplotlib.pyplot import *
 import os
 import sys
 
-
+folder="//"
 def plot_figure(fileName):
 	data = open(fileName,"r")
 	y=[]
@@ -33,14 +33,14 @@ def plot_ave_figure(fileName):
 caffe_root = os.environ["CAFFE_ROOT"]
 if len(sys.argv)==2: 
 	fileName = sys.argv[1]
-	os.system(caffe_root+'/1_scripts/extract_trace.sh '+fileName)
-	fileName1 = caffe_root+"/2_results/train_loss.csv"
-	fileName2 = caffe_root+"/2_results/train_accuracy_top1.csv"
-	fileName3 = caffe_root+"/2_results/train_accuracy_top5.csv"
+	os.system(caffe_root+'/1_scripts/'+folder+'extract_trace.sh '+fileName)
+	fileName1 = caffe_root+"/2_results/"+folder+"train_loss.csv"
+	fileName2 = caffe_root+"/2_results/"+folder+"train_acc_top1.csv"
+	fileName3 = caffe_root+"/2_results/"+folder+"train_acc_top5.csv"
 
-	fileName4 = caffe_root+"/2_results/test_loss.csv"
-	fileName5 = caffe_root+"/2_results/test_accuracy_top1.csv"
-	fileName6 = caffe_root+"/2_results/test_accuracy_top5.csv"
+	fileName4 = caffe_root+"/2_results/"+folder+"test_loss.csv"
+	fileName5 = caffe_root+"/2_results/"+folder+"test_acc_top1.csv"
+	fileName6 = caffe_root+"/2_results/"+folder+"test_acc_top5.csv"
 
 	plot_ave_figure(fileName1)
 	xlabel("iteration")
