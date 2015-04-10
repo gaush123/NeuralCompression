@@ -77,7 +77,7 @@ elif target == 'imagenet':
 #   net = caffe.Net(prototxt, caffemodel, caffe.TEST)
     layers = ['conv1', 'conv2', 'conv3', 'conv4', 'conv5', 'fc6', 'fc7', 'fc8']
     layers_tbd = [ 'fc6', 'fc7', 'fc8']
-    output_prefix = caffe_root+'/4_model_checkpoint/1_before_retrain/alex_pruned_'
+    output_prefix = caffe_root+'/4_model_checkpoint/1_before_retrain/alex_gradient_pruned_'
 
 
 
@@ -88,7 +88,7 @@ if analyze_only:
 num_cores = multiprocessing.cpu_count()
 print "num_cores = %d" % num_cores
 numBins = 2 ^ 8
-threshold_list = [0.2e-6 * i for i in range(40)]
+threshold_list = [0.2e-6*i for i in range(40)]
 fout = open(caffe_root+'/2_results/parameter_cnt_678half.csv', 'w')
 suffix = '_678half.caffemodel'
 
@@ -151,7 +151,6 @@ def prune(threshold):
 
 caffe.set_mode_gpu()
 caffe.set_device(1)
-prune(0.0)
 
 results = []
 for threshold in threshold_list:
