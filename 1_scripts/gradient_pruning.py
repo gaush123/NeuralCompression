@@ -88,11 +88,11 @@ if analyze_only:
 num_cores = multiprocessing.cpu_count()
 print "num_cores = %d" % num_cores
 numBins = 2 ^ 8
-threshold_list = [1e-7, 2e-7, 3e-7, 4e-7, ]
+threshold_list = [0.2e-6 * i for i in range(40)]
 fout = open(caffe_root+'/2_results/parameter_cnt_678half.csv', 'w')
 suffix = '_678half.caffemodel'
 
-def calculate_gradients(net, n_iter=10):
+def calculate_gradients(net, n_iter=50):
     global layers_tbd
     grads = { l: None for l in layers_tbd }
     for i in range(n_iter):
@@ -125,25 +125,25 @@ def prune(threshold):
         gradW = grads[layer][0]
         #     hi = np.max(np.abs(W.flatten()))
         hi = np.std(W.flatten())
-        print layer
-        histoBins = [0.2e-6*i for i in range(20)] + [1]
-        counts, edges = np.histogram(np.abs(W * gradW), bins=histoBins)
-        for c,e in zip(counts,edges):
-            print c, e
-#        mask = (np.abs(W * gradW) > (hi * threshold))
-#        if layer == 'fc8':
-#            mask = (np.abs(W) > (hi * threshold / 2))
-#        mask = np.bool_(mask)
-#        W = W * mask
-#        print 'non-zero W percentage = %0.4f ' % (np.count_nonzero(W.flatten()) / float(np.prod(W.shape)))
-#        net.params[layer][0].data[...] = W
-#        net.params[layer][0].mask[...] = mask
-#        print net.params[layer][0].mask.shape
-#
-#    total_percentage = analyze_param(net, layers)
-#    output_model = output_prefix + str(threshold) + suffix
-#    net.save(output_model)
-#    return (threshold, total_percentage)
+#        print layer
+#        histoBins = [0.2e-6*i for i in range(20)] + [1]
+#        counts, edges = np.histogram(np.abs(W * gradW), bins=histoBins)
+#        for c,e in zip(counts,edges):
+#            print c, e
+        mask = (np.abs(W * gradW) > (hi * threshold))
+        if layer == 'fc8':
+            mask = (np.abs(W) > (hi * threshold / 2))
+        mask = np.bool_(mask)
+        W = W * mask
+        print 'non-zero W percentage = %0.4f ' % (np.count_nonzero(W.flatten()) / float(np.prod(W.shape)))
+        net.params[layer][0].data[...] = W
+        net.params[layer][0].mask[...] = mask
+        print net.params[layer][0].mask.shape
+
+    total_percentage = analyze_param(net, layers)
+    output_model = output_prefix + str(threshold) + suffix
+    net.save(output_model)
+    return (threshold, total_percentage)
 
 # Parallel version for this code:
 # for threshold in threshold_list:
@@ -153,11 +153,15 @@ caffe.set_mode_gpu()
 caffe.set_device(1)
 prune(0.0)
 
+results = []
+for threshold in threshold_list:
+     results.append(prune(threshold))
+
 #results = Parallel(n_jobs=num_cores)(delayed(prune)(threshold) for threshold in threshold_list)
 
-#print results
-#for (threshold, percentage) in results:
-#    fout.write("%4.1f, %.4f\n" % (threshold, percentage))
-#fout.close()
-#sys.exit(0)
+print results
+for (threshold, percentage) in results:
+    fout.write("%4.1f, %.4f\n" % (threshold, percentage))
+fout.close()
+sys.exit(0)
 
