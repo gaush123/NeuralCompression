@@ -92,3 +92,10 @@ LOCK
 LOG*
 CURRENT
 MANIFEST-*
+ 
+# tmp files
+*lala
+*tmp
+tmp*
+*.txt
+*.csv

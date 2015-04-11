@@ -4,18 +4,16 @@ from matplotlib.pyplot import *
 import os
 import sys
 
-
-def plot_figure(fileName):
+folder="//"
+def analyze_log(fileName):
 	data = open(fileName,"r")
 	y=[]
 	for line in data:
 		y.append(float(line.split()[0]))
 	
-	x=range(len(y))
-	figure
-	plot(x, y)
+	return y
 
-def plot_ave_figure(fileName):
+def analyze_log_ave(fileName):
 	data = open(fileName,"r")
 	y=[]
 	line_cnt=0
@@ -26,52 +24,54 @@ def plot_ave_figure(fileName):
 		if line_cnt == 10:
 			y.append(reduce(lambda x, y: x + y, tmp_y) / float(len(tmp_y)))
 			line_cnt=0
-	x=range(len(y))
-	figure
-	plot(x, y)
+	return y
 
 caffe_root = os.environ["CAFFE_ROOT"]
 if len(sys.argv)==2: 
 	fileName = sys.argv[1]
-	os.system(caffe_root+'/1_scripts/extract_trace.sh '+fileName)
-	fileName1 = caffe_root+"/2_results/train_loss.csv"
-	fileName2 = caffe_root+"/2_results/train_accuracy_top1.csv"
-	fileName3 = caffe_root+"/2_results/train_accuracy_top5.csv"
+	os.system(caffe_root+'/1_scripts/'+folder+'extract_trace.sh '+fileName)
+	fileName1 = caffe_root+"/2_results/"+folder+"train_loss.csv"
+	fileName2 = caffe_root+"/2_results/"+folder+"train_acc_top1.csv"
+	fileName3 = caffe_root+"/2_results/"+folder+"train_acc_top5.csv"
+	fileName4 = caffe_root+"/2_results/"+folder+"test_loss.csv"
+	fileName5 = caffe_root+"/2_results/"+folder+"test_acc_top1.csv"
+	fileName6 = caffe_root+"/2_results/"+folder+"test_acc_top5.csv"
 
-	fileName4 = caffe_root+"/2_results/test_loss.csv"
-	fileName5 = caffe_root+"/2_results/test_accuracy_top1.csv"
-	fileName6 = caffe_root+"/2_results/test_accuracy_top5.csv"
-
-	plot_ave_figure(fileName1)
-	xlabel("iteration")
-	ylabel("training loss")
+	y_loss=analyze_log_ave(fileName1)
+	y_top1=analyze_log_ave(fileName2)
+	y_top5=analyze_log_ave(fileName3)
+	x=[x * 20*10 for x in xrange(len(y_loss))]
+	subplot(1,3,1)
+	plot(x, y_loss)
 	title ("training loss")
-	show()
-	plot_ave_figure(fileName2)
-	xlabel("iteration")
-	ylabel("training accuracy_top1")
-	title ("training accuracy_top1")
-	show()
-	plot_ave_figure(fileName3)
-	xlabel("iteration")
-	ylabel("training accuracy_top5")
-	title ("training accuracy_top5")
-	show()
 	
-	plot_figure(fileName4)
-	xlabel("iteration")
-	ylabel("test loss")
+	subplot(1,3,2)
+	plot(x, y_top1, 'r')
+	title ("training accuracy_top1")
+	
+	subplot(1,3,3)
+	plot(x, y_top5, 'r')
+	title ("training accuracy_top5")
+	draw() 
+
+	figure()
+	
+	y_loss=analyze_log(fileName4)
+	y_top1=analyze_log(fileName5)
+	y_top5=analyze_log(fileName6)
+	x=[x * 5000 for x in xrange(len(y_loss))]
+	subplot(1,3,1)
+	plot(x, y_loss)
 	title ("test loss")
-        show()
-	plot_figure(fileName5)
-	xlabel("iteration")
-	ylabel("test accuracy_top1")
+	
+	subplot(1,3,2)
+	plot(x, y_top1, 'r')
 	title ("test accuracy_top1")
-        show()        
-	plot_figure(fileName6)
-	xlabel("iteration")
-	ylabel("test accuracy_top5")
+	
+	subplot(1,3,3)
+	plot(x, y_top5, 'r')
 	title ("test accuracy_top5")
 	show()
+	
 else:
-        print("please pass in file name!")
+    print("please pass in file name!")
