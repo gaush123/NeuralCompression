@@ -2,7 +2,7 @@
 test_initialization: false
 average_loss : 100
 snapshot_diff : false
-net: "/home/song/pruning/3_prototxt_solver/train_val_prune2.prototxt"
+net: "./3_prototxt_solver/train_val_prune2.prototxt"
 test_iter: 1000
 test_interval: 5000
 base_lr: 1e-4
@@ -14,6 +14,6 @@ max_iter: 900000
 momentum: 0.9
 weight_decay: 1e-4 
 snapshot: 5000
-snapshot_prefix: "/home/song/pruning/4_model_checkpoint/2_after_retrain/prune2"
+snapshot_prefix: "./4_model_checkpoint/2_after_retrain/prune2"
 solver_mode: GPU
 
