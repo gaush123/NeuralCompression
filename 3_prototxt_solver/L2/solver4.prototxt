@@ -1,0 +1,19 @@
+test_initialization: false
+average_loss : 100
+snapshot_diff : false
+net: "/home/song/pruning/3_prototxt_solver/L2/train_val.prototxt"
+test_iter: 1000
+test_interval: 5000
+base_lr: 1e-4
+lr_policy: "step"
+gamma: 0.2
+stepsize: 200000
+display: 20
+max_iter: 900000
+momentum: 0.9
+weight_decay: 1e-3  #//5e-4
+snapshot: 5000
+snapshot_prefix: "/home/song/pruning/4_model_checkpoint/2_after_retrain/L2/prune1.3"
+solver_mode: GPU
+
+solver_type: NESTEROV
