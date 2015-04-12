@@ -1,3 +1,4 @@
+#step size =30
 test_initialization: false
 average_loss : 100
 snapshot_diff : false
@@ -7,14 +8,13 @@ test_interval: 5000
 base_lr: 1e-4
 lr_policy: "step"
 gamma: 0.2
-stepsize: 200000
+stepsize: 300000
 display: 20
 max_iter: 900000
 momentum: 0.9
 weight_decay: 1e-3  #//5e-4
 snapshot: 5000
-snapshot_prefix: "./4_model_checkpoint/2_after_retrain/L2/prune1.1"
+snapshot_prefix: "./4_model_checkpoint/2_after_retrain/L2/prune1.7"
 solver_mode: GPU
 
 solver_type: NESTEROV
-
