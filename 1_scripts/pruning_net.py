@@ -46,26 +46,29 @@ def analyze_param(net, layers):
 
 # options defined here:
 analyze_only = 0
-folder="/L2/"
+folder="/L1_2/"
 
 prototxt = caffe_root+'/3_prototxt_solver/'+folder+'deploy.prototxt'
 caffemodel = caffe_root+'/4_model_checkpoint/0_original_dense/'+folder+'bvlc_alexnet.caffemodel'
-# caffemodel = caffe_root+'/4_model_checkpoint/0_original_dense/'+folder+'caffe_alexnet_train1_iter_1885000.caffemodel'
-# net = caffe.Net(prototxt, caffemodel, caffe.TEST)
 if folder[2]=='1':
     layers = ['conv1', 'conv2', 'conv3', 'conv4', 'conv5', 'fc6_new', 'fc7_new', 'fc8_new']
-    layers_tbd = [ 'fc6_new', 'fc7_new', 'fc8_new']
-else:
+    # layers_tbd = [ 'fc6_new', 'fc7_new', 'fc8_new']
+    layers_tbd = ['fc6']
+if folder[2]=='2':
     layers = ['conv1', 'conv2', 'conv3', 'conv4', 'conv5', 'fc6', 'fc7', 'fc8']
-    layers_tbd = [ 'fc6', 'fc7', 'fc8']
-output_prefix = caffe_root+'/4_model_checkpoint/1_before_retrain/'+folder+'alex_pruned_'
-suffix = '_678half.caffemodel'
+    # layers_tbd = [ 'fc6', 'fc7', 'fc8']
+    layers_tbd = ['fc6']
+else:
+    print "error"
+suffix = '_fc6.caffemodel'
+output_prefix = caffe_root+'/4_model_checkpoint/1_before_retrain/'+folder+'layerwise_'
 threshold_list = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2.0, 2.1, 2.2, 2.3]
 fout = open(caffe_root+'/2_results/'+folder+'parameter_cnt_678half.csv', 'w')
 
 
 numBins = 2 ^ 8
 if analyze_only:
+    net = caffe.Net(prototxt, caffemodel, caffe.TEST)
     analyze_param(net, layers)
     sys.exit(0)
 
@@ -82,8 +85,8 @@ def prune(threshold):
         #     hi = np.max(np.abs(W.flatten()))
         hi = np.std(W.flatten())
         mask = (np.abs(W) > (hi * threshold))
-        if layer == layers_tbd[-1]:
-            mask = (np.abs(W) > (hi * threshold / 2))
+        # if layer == layers_tbd[-1]:
+        #     mask = (np.abs(W) > (hi * threshold / 2))
         mask = np.bool_(mask)
         W = W * mask
         print 'non-zero W percentage = %0.4f ' % (np.count_nonzero(W.flatten()) / float(np.prod(W.shape)))
