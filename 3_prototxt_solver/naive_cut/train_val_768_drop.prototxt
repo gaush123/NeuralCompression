@@ -1,4 +1,4 @@
-# conv lr=0, wd=0; unchanged: dropout = 0.5, lr=2 for bias
+#new name for fc6,7,8  size = 1024 instead of 4096, lr=0 for conv
 name: "AlexNet"
 layer {
   name: "data"
@@ -45,7 +45,7 @@ layer {
   top: "conv1"
   param {
     lr_mult: 0
-    decay_mult: 0
+    decay_mult: 1
   }
   param {
     lr_mult: 0
@@ -100,7 +100,7 @@ layer {
   top: "conv2"
   param {
     lr_mult: 0
-    decay_mult: 0
+    decay_mult: 1
   }
   param {
     lr_mult: 0
@@ -156,7 +156,7 @@ layer {
   top: "conv3"
   param {
     lr_mult: 0
-    decay_mult: 0
+    decay_mult: 1
   }
   param {
     lr_mult: 0
@@ -189,7 +189,7 @@ layer {
   top: "conv4"
   param {
     lr_mult: 0
-    decay_mult: 0
+    decay_mult: 1
   }
   param {
     lr_mult: 0
@@ -223,7 +223,7 @@ layer {
   top: "conv5"
   param {
     lr_mult: 0
-    decay_mult: 0
+    decay_mult: 1
   }
   param {
     lr_mult: 0
@@ -262,7 +262,7 @@ layer {
   }
 }
 layer {
-  name: "fc6"
+  name: "fc6_new"
   type: "InnerProduct"
   bottom: "pool5"
   top: "fc6"
@@ -275,7 +275,7 @@ layer {
     decay_mult: 0
   }
   inner_product_param {
-    num_output: 4096
+    num_output: 1024
     weight_filler {
       type: "gaussian"
       std: 0.005
@@ -298,11 +298,11 @@ layer {
   bottom: "fc6"
   top: "fc6"
   dropout_param {
-    dropout_ratio: 0.5
+    dropout_ratio: 0.09375
   }
 }
 layer {
-  name: "fc7"
+  name: "fc7_new"
   type: "InnerProduct"
   bottom: "fc6"
   top: "fc7"
@@ -315,7 +315,7 @@ layer {
     decay_mult: 0
   }
   inner_product_param {
-    num_output: 4096
+    num_output: 1024
     weight_filler {
       type: "gaussian"
       std: 0.005
@@ -338,11 +338,11 @@ layer {
   bottom: "fc7"
   top: "fc7"
   dropout_param {
-    dropout_ratio: 0.5
+    dropout_ratio: 0.09375
   }
 }
 layer {
-  name: "fc8"
+  name: "fc8_new"
   type: "InnerProduct"
   bottom: "fc7"
   top: "fc8"

@@ -12,7 +12,7 @@ stepsize: 60000 #100000
 display: 20
 max_iter: 900000
 momentum: 0.9
-weight_decay: 1e-3  #//5e-4
+weight_decay: 5e-4  #//5e-4
 snapshot: 2500 #small
 snapshot_prefix: "./4_model_checkpoint/2_after_retrain/L2/prune0.8"
 solver_mode: GPU

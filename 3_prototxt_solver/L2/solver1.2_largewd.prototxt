@@ -7,13 +7,13 @@ test_interval: 5000
 base_lr: 1e-4
 lr_policy: "step"
 gamma: 0.2
-stepsize: 350000
+stepsize: 300000
 display: 20
 max_iter: 900000
 momentum: 0.9
-weight_decay: 5e-4
+weight_decay: 1e-3
 snapshot: 5000
-snapshot_prefix: "./4_model_checkpoint/2_after_retrain/L2/prune1.8"
+snapshot_prefix: "./4_model_checkpoint/2_after_retrain/L2/prune1.2_largewd"
 solver_mode: GPU
 
 solver_type: NESTEROV

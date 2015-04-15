@@ -1,3 +1,4 @@
+#small snapshot/step size
 test_initialization: false
 average_loss : 100
 snapshot_diff : false
@@ -11,8 +12,8 @@ stepsize: 60000
 display: 20
 max_iter: 900000
 momentum: 0.9
-weight_decay: 1e-3  #//5e-4
-snapshot: 5000
+weight_decay: 5e-4
+snapshot: 2500
 snapshot_prefix: "./4_model_checkpoint/2_after_retrain/L2/prune0.9"
 solver_mode: GPU
 
