@@ -30,8 +30,8 @@ if len(sys.argv) == 2:
 	ax2.scatter(x, y2, s=ss, color='m')
 	ax2.scatter(x, y3, s=ss, color='r')
 
-	ax1.bar(x, y1, width=0.1, color='g', label='parameter count')
-# 	ax1.plot(x, y1, lw=2, color='g', label='parameter count')
+# 	ax1.bar(x, y1, width=0.1, color='g', label='parameter count')
+	ax1.plot(x, y1, lw=2, color='g', label='parameter count')
 	ax2.plot(x, y2, lw=2, color='m', label='top-1 accuracy')
 	ax2.plot(x, y3, lw=2, color='r', label='top-5 accuracy')
 

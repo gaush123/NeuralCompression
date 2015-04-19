@@ -78,5 +78,5 @@ if len(sys.argv) == 3:
     show()
 
 else:
-    print("please pass in file name!")
+    print("please pass in 2 file name!")
 
