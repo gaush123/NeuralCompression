@@ -1,4 +1,4 @@
-# conv lr=0, wd=0; unchanged: dropout = 0.5, lr=2 for bias
+# conv lr=0, wd=0,  dropout = sqrt(prune ratio), lr=2 for bias
 name: "AlexNet"
 layer {
   name: "data"
@@ -15,7 +15,7 @@ layer {
   }
   data_param {
     source: "./examples/imagenet/ilsvrc12_train_lmdb"
-    batch_size: 100
+    batch_size: 230
     backend: LMDB
   }
 }
@@ -290,21 +290,21 @@ layer {
   name: "relu6"
   type: "ReLU"
   bottom: "fc6"
-  top: "fc6_relu"
+  top: "fc6"
 }
 layer {
   name: "drop6"
   type: "Dropout"
-  bottom: "fc6_relu"
-  top: "fc6_drop"
+  bottom: "fc6"
+  top: "fc6"
   dropout_param {
-    dropout_ratio: 0
+    dropout_ratio: 0.044
   }
 }
 layer {
   name: "fc7"
   type: "InnerProduct"
-  bottom: "fc6_drop"
+  bottom: "fc6"
   top: "fc7"
   param {
     lr_mult: 1
@@ -330,21 +330,21 @@ layer {
   name: "relu7"
   type: "ReLU"
   bottom: "fc7"
-  top: "fc7_relu"
+  top: "fc7"
 }
 layer {
   name: "drop7"
   type: "Dropout"
-  bottom: "fc7_relu"
-  top: "fc7_drop"
+  bottom: "fc7"
+  top: "fc7"
   dropout_param {
-    dropout_ratio: 0
+    dropout_ratio: 0.044
   }
 }
 layer {
   name: "fc8"
   type: "InnerProduct"
-  bottom: "fc7_drop" 
+  bottom: "fc7"
   top: "fc8"
   param {
     lr_mult: 1
