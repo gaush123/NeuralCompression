@@ -1,0 +1,16 @@
+test_initialization: false
+
+net: "./3_prototxt_solver/naive_cut/train_val_2048_drop.prototxt"
+test_iter: 1000
+test_interval: 5000
+base_lr: 0.0001
+lr_policy: "step"
+gamma: 0.1
+stepsize: 400000
+display: 20
+max_iter: 950000
+momentum: 0.9
+weight_decay: 0.0005
+snapshot: 5000
+snapshot_prefix: "./4_model_checkpoint/naive_cut/cut_2048_drop_"
+solver_mode: GPU

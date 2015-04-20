@@ -1,19 +1,20 @@
 test_initialization: false
 average_loss : 100
 snapshot_diff : false
-net: "./3_prototxt_solver/L2/train_val.prototxt"
+net: "./3_prototxt_solver/L2/train_val1.91.prototxt"
 test_iter: 1000
 test_interval: 5000
 base_lr: 1e-4
 lr_policy: "step"
 gamma: 0.2
-stepsize: 200000
+stepsize: 600000
 display: 20
-max_iter: 900000
+max_iter: 1000000
 momentum: 0.9
-weight_decay: 1e-3  #//5e-4
+weight_decay: 5e-4
 snapshot: 5000
-snapshot_prefix: "./4_model_checkpoint/2_after_retrain/L2/prune0.9"
+snapshot_prefix: "./4_model_checkpoint/2_after_retrain/L2/prune1.91"
 solver_mode: GPU
 
 solver_type: NESTEROV
+

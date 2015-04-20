@@ -1,4 +1,4 @@
-# conv lr=0, wd=0; unchanged: dropout = 0.5, lr=2 for bias
+# conv lr=0,  new name, dropout = 0
 name: "AlexNet"
 layer {
   name: "data"
@@ -15,7 +15,7 @@ layer {
   }
   data_param {
     source: "./examples/imagenet/ilsvrc12_train_lmdb"
-    batch_size: 100
+    batch_size: 240
     backend: LMDB
   }
 }
@@ -45,7 +45,7 @@ layer {
   top: "conv1"
   param {
     lr_mult: 0
-    decay_mult: 0
+    decay_mult: 1
   }
   param {
     lr_mult: 0
@@ -100,7 +100,7 @@ layer {
   top: "conv2"
   param {
     lr_mult: 0
-    decay_mult: 0
+    decay_mult: 1
   }
   param {
     lr_mult: 0
@@ -156,7 +156,7 @@ layer {
   top: "conv3"
   param {
     lr_mult: 0
-    decay_mult: 0
+    decay_mult: 1
   }
   param {
     lr_mult: 0
@@ -189,7 +189,7 @@ layer {
   top: "conv4"
   param {
     lr_mult: 0
-    decay_mult: 0
+    decay_mult: 1
   }
   param {
     lr_mult: 0
@@ -223,7 +223,7 @@ layer {
   top: "conv5"
   param {
     lr_mult: 0
-    decay_mult: 0
+    decay_mult: 1
   }
   param {
     lr_mult: 0
@@ -262,7 +262,7 @@ layer {
   }
 }
 layer {
-  name: "fc6"
+  name: "fc6_new"
   type: "InnerProduct"
   bottom: "pool5"
   top: "fc6"
@@ -277,7 +277,7 @@ layer {
   inner_product_param {
     num_output: 4096
     weight_filler {
-      type: "gaussian"
+      type: "xavier"
       std: 0.005
     }
     bias_filler {
@@ -290,21 +290,21 @@ layer {
   name: "relu6"
   type: "ReLU"
   bottom: "fc6"
-  top: "fc6_relu"
+  top: "fc6"
 }
 layer {
   name: "drop6"
   type: "Dropout"
-  bottom: "fc6_relu"
-  top: "fc6_drop"
+  bottom: "fc6"
+  top: "fc6"
   dropout_param {
     dropout_ratio: 0
   }
 }
 layer {
-  name: "fc7"
+  name: "fc7_new"
   type: "InnerProduct"
-  bottom: "fc6_drop"
+  bottom: "fc6"
   top: "fc7"
   param {
     lr_mult: 1
@@ -317,7 +317,7 @@ layer {
   inner_product_param {
     num_output: 4096
     weight_filler {
-      type: "gaussian"
+      type: "xavier"
       std: 0.005
     }
     bias_filler {
@@ -330,21 +330,21 @@ layer {
   name: "relu7"
   type: "ReLU"
   bottom: "fc7"
-  top: "fc7_relu"
+  top: "fc7"
 }
 layer {
   name: "drop7"
   type: "Dropout"
-  bottom: "fc7_relu"
-  top: "fc7_drop"
+  bottom: "fc7"
+  top: "fc7"
   dropout_param {
     dropout_ratio: 0
   }
 }
 layer {
-  name: "fc8"
+  name: "fc8_new"
   type: "InnerProduct"
-  bottom: "fc7_drop" 
+  bottom: "fc7"
   top: "fc8"
   param {
     lr_mult: 1
@@ -357,7 +357,7 @@ layer {
   inner_product_param {
     num_output: 1000
     weight_filler {
-      type: "gaussian"
+      type: "xavier"  #xavier
       std: 0.01
     }
     bias_filler {
