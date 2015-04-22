@@ -1,6 +1,6 @@
 #!/bin/bash
 #no argument required
-thresh_list=(0.0  0.4  0.8  1.2  1.6 )
+thresh_list=(0.46 0.72 1.05 1.27 1.44 1.58 1.70 1.81 1.91 2.00)
 folder=L2
 #suffix="fc678"
 suffix="678half"
@@ -19,15 +19,22 @@ tmp4=.`date +"%T.%3N"`.tmp
 
 
 
-for data1 in ${thresh_list[@]} 
+# for data1 in ${thresh_list[@]}
+size=${#thresh_list[@]}
+echo $size 
+end=`echo "$size/4" | bc `
+for i in $(seq 0 $end);
 do	
-	data2=`echo "$data1+0.1" | bc `
-	data3=`echo "$data2+0.1" | bc `
-	data4=`echo "$data3+0.1" | bc `
-	data1=`printf "%.1f" $data1`
-	data2=`printf "%.1f" $data2`
-	data3=`printf "%.1f" $data3`
-	data4=`printf "%.1f" $data4`
+	echo $i
+    data1=${thresh_list[4*i]}
+    data2=${thresh_list[4*i+1]}
+    data3=${thresh_list[4*i+2]}
+    data4=${thresh_list[4*i+3]}
+	
+	data1=`printf "%.2f" $data1`
+	data2=`printf "%.2f" $data2`
+	data3=`printf "%.2f" $data3`
+	data4=`printf "%.2f" $data4`
 
 	result1=$data1
 	result2=$data2
@@ -37,22 +44,22 @@ do
 	filename2=$filename_prefix$data2"_$suffix.caffemodel"		
 	filename3=$filename_prefix$data3"_$suffix.caffemodel"		
 	filename4=$filename_prefix$data4"_$suffix.caffemodel"		
-	# echo $result1
-	# echo $result2
-	# echo $result3
-	# echo $result4
+	echo $result1
+	echo $result2
+	echo $result3
+	echo $result4
 	rm -rf $tmp1
 	rm -rf $tmp2
 	rm -rf $tmp3
 	rm -rf $tmp4
-	echo $CAFFE_ROOT/build/tools/caffe test --model=$model --weights=$filename1  --iterations=1000 -gpu 0 
+	echo ./build/tools/caffe test --model=$model --weights=$filename1  --iterations=1000 -gpu 0 
 	# echo $CAFFE_ROOT/build/tools/caffe test --model=$model --weights=$filename2  --iterations=1000 -gpu 1 
 	# echo $CAFFE_ROOT/build/tools/caffe test --model=$model --weights=$filename3  --iterations=1000 -gpu 2 
 	# echo $CAFFE_ROOT/build/tools/caffe test --model=$model --weights=$filename4  --iterations=1000 -gpu 3 
-	$CAFFE_ROOT/build/tools/caffe test --model=$model --weights=$filename1  --iterations=1000 -gpu 0 >$tmp1 2>&1  &
-	$CAFFE_ROOT/build/tools/caffe test --model=$model --weights=$filename2  --iterations=1000 -gpu 1 >$tmp2 2>&1  &
-	$CAFFE_ROOT/build/tools/caffe test --model=$model --weights=$filename3  --iterations=1000 -gpu 2 >$tmp3 2>&1  &
-	$CAFFE_ROOT/build/tools/caffe test --model=$model --weights=$filename4  --iterations=1000 -gpu 3 >$tmp4 2>&1  &
+	./build/tools/caffe test --model=$model --weights=$filename1  --iterations=1000 -gpu 0 >$tmp1 2>&1  &
+	./build/tools/caffe test --model=$model --weights=$filename2  --iterations=1000 -gpu 1 >$tmp2 2>&1  &
+	./build/tools/caffe test --model=$model --weights=$filename3  --iterations=1000 -gpu 2 >$tmp3 2>&1  &
+	./build/tools/caffe test --model=$model --weights=$filename4  --iterations=1000 -gpu 3 >$tmp4 2>&1  &
 	echo "waiting..."
 	wait
 	echo "done"

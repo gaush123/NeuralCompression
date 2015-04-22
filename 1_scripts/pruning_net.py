@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 
 os.system("cd $CAFFE_ROOT")
 caffe_root = os.environ["CAFFE_ROOT"]
-print caffe_root
+print "caffe_root is: ", caffe_root
 sys.path.insert(0, caffe_root + 'python')
 import caffe
 
@@ -69,9 +69,9 @@ suffix = '678half'
 suffix_2 = 'alex_pruned_'
 # suffix_2 = 'layerwise_'
 output_prefix = caffe_root + '/4_model_checkpoint/1_before_retrain/' + folder + suffix_2
-threshold_list = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2.0, 2.1, 2.2, 2.3]
-threshold_list = np.arange(1.55, 2.05, 0.01)
-threshold_list = [0.5, 0.8, 1.05, 1.27, 1.44, 1.58, 1.7, 1.81, 1.91, 2.0]
+# threshold_list = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2.0, 2.1, 2.2, 2.3]
+# threshold_list = np.arange(1.55, 2.05, 0.01)
+threshold_list = [0.46, 0.72, 1.05, 1.27, 1.44, 1.58, 1.70, 1.81, 1.91, 2.00]
 print "threshold list is", threshold_list
 fout = open(caffe_root + '/2_results/' + folder + 'parameter_cnt_' + suffix + '.csv', 'a')
 fout2 = open(caffe_root + '/2_results/' + folder + 'eachLayer_' + suffix + '.csv', 'a')
@@ -126,10 +126,10 @@ results = Parallel(n_jobs=num_cores)(delayed(prune)(threshold) for threshold in 
 for result in results:
     print result
 for (threshold, total_percentage, percentage_list) in results:
-    fout.write("%4.3f, %.5f,\n" % (threshold, total_percentage))
+    fout.write("%4.2f, %.5f,\n" % (threshold, total_percentage))
 
 for (threshold, total_percentage, percentage_list) in results:
-    fout2.write("%4.3f, %.5f, %.5f, %.5f\n" % (threshold, percentage_list[-3], percentage_list[-2], percentage_list[-1]))
+    fout2.write("%4.2f, %.5f, %.5f, %.5f\n" % (threshold, percentage_list[-3], percentage_list[-2], percentage_list[-1]))
 
 fout.close()
 fout2.close()
