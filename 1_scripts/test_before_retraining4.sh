@@ -1,7 +1,8 @@
 #!/bin/bash
 #no argument required
 thresh_list=(0.46 0.72 1.05 1.27 1.44 1.58 1.70 1.81 1.91 2.00)
-folder=L2
+thresh_list=(0 0.25 0.69 1.06 1.35 1.59 1.80 1.99 2.16 2.32)
+folder=L1_3
 #suffix="fc678"
 suffix="678half"
 #suffix_2="layerwise_"
@@ -56,10 +57,10 @@ do
 	# echo $CAFFE_ROOT/build/tools/caffe test --model=$model --weights=$filename2  --iterations=1000 -gpu 1 
 	# echo $CAFFE_ROOT/build/tools/caffe test --model=$model --weights=$filename3  --iterations=1000 -gpu 2 
 	# echo $CAFFE_ROOT/build/tools/caffe test --model=$model --weights=$filename4  --iterations=1000 -gpu 3 
-	./build/tools/caffe test --model=$model --weights=$filename1  --iterations=1000 -gpu 0 >$tmp1 2>&1  &
+	./build/tools/caffe test --model=$model --weights=$filename1  --iterations=1000 -gpu 1 >$tmp1 2>&1  &
 	./build/tools/caffe test --model=$model --weights=$filename2  --iterations=1000 -gpu 1 >$tmp2 2>&1  &
 	./build/tools/caffe test --model=$model --weights=$filename3  --iterations=1000 -gpu 2 >$tmp3 2>&1  &
-	./build/tools/caffe test --model=$model --weights=$filename4  --iterations=1000 -gpu 3 >$tmp4 2>&1  &
+	./build/tools/caffe test --model=$model --weights=$filename4  --iterations=1000 -gpu 2 >$tmp4 2>&1  &
 	echo "waiting..."
 	wait
 	echo "done"

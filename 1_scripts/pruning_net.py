@@ -8,6 +8,7 @@ import sys
 import os
 import numpy as np
 import matplotlib.pyplot as plt
+from 1_scripts.creat_script import thresh_list
 
 os.system("cd $CAFFE_ROOT")
 caffe_root = os.environ["CAFFE_ROOT"]
@@ -49,9 +50,9 @@ def analyze_param(net, layers):
 
 # options defined here:
 analyze_only = 0
-folder = "/L2/"
+folder = "/L1_3/"
 
-prototxt = caffe_root + '/3_prototxt_solver/' + folder + 'deploy.prototxt'
+prototxt = caffe_root + '/3_prototxt_solver/' + folder + 'train_val.prototxt'
 caffemodel = caffe_root + '/4_model_checkpoint/0_original_dense/' + folder + 'bvlc_alexnet.caffemodel'
 if folder[2] == '1':
     layers = ['conv1', 'conv2', 'conv3', 'conv4', 'conv5', 'fc6_new', 'fc7_new', 'fc8_new']
@@ -70,11 +71,17 @@ suffix_2 = 'alex_pruned_'
 # suffix_2 = 'layerwise_'
 output_prefix = caffe_root + '/4_model_checkpoint/1_before_retrain/' + folder + suffix_2
 # threshold_list = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2.0, 2.1, 2.2, 2.3]
-# threshold_list = np.arange(1.55, 2.05, 0.01)
-threshold_list = [0.46, 0.72, 1.05, 1.27, 1.44, 1.58, 1.70, 1.81, 1.91, 2.00]
+# threshold_list = [0.46, 0.72, 1.05, 1.27, 1.44, 1.58, 1.70, 1.81, 1.91, 2.00]
+threshold_list = np.arange(0, 2.50, 0.01)
+threshold_list = [0, 0.25, 0.69, 1.06, 1.35, 1.59, 1.80, 1.99, 2.16, 2.32]
+
 print "threshold list is", threshold_list
 fout = open(caffe_root + '/2_results/' + folder + 'parameter_cnt_' + suffix + '.csv', 'a')
 fout2 = open(caffe_root + '/2_results/' + folder + 'eachLayer_' + suffix + '.csv', 'a')
+
+threshold_list = [ "{:1.2f}".format(x) for x in threshold_list]
+print "threshold list is", threshold_list
+
 
 
 numBins = 2 ^ 8
