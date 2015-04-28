@@ -53,14 +53,14 @@ do
 	rm -rf $tmp2
 	rm -rf $tmp3
 	rm -rf $tmp4
-	echo ./build/tools/caffe test --model=$model --weights=$filename1  --iterations=1000 -gpu 0 
+# 	echo ./build/tools/caffe test --model=$model --weights=$filename1  --iterations=1000 -gpu 1 
 	# echo $CAFFE_ROOT/build/tools/caffe test --model=$model --weights=$filename2  --iterations=1000 -gpu 1 
 	# echo $CAFFE_ROOT/build/tools/caffe test --model=$model --weights=$filename3  --iterations=1000 -gpu 2 
 	# echo $CAFFE_ROOT/build/tools/caffe test --model=$model --weights=$filename4  --iterations=1000 -gpu 3 
-	./build/tools/caffe test --model=$model --weights=$filename1  --iterations=1000 -gpu 1 >$tmp1 2>&1  &
+	./build/tools/caffe test --model=$model --weights=$filename1  --iterations=1000 -gpu 0 >$tmp1 2>&1  &
 	./build/tools/caffe test --model=$model --weights=$filename2  --iterations=1000 -gpu 1 >$tmp2 2>&1  &
 	./build/tools/caffe test --model=$model --weights=$filename3  --iterations=1000 -gpu 2 >$tmp3 2>&1  &
-	./build/tools/caffe test --model=$model --weights=$filename4  --iterations=1000 -gpu 2 >$tmp4 2>&1  &
+	./build/tools/caffe test --model=$model --weights=$filename4  --iterations=1000 -gpu 3 >$tmp4 2>&1  &
 	echo "waiting..."
 	wait
 	echo "done"
