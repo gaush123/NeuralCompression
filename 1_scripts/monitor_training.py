@@ -77,6 +77,7 @@ if len(sys.argv) == 2:
 	top5 = y_top5[idx] * 100
 	print "\nbest top1 accuracy (*%.2f%%*, %.2f%%)" % (top1, top5)
 	print "=> accuracy loss   (%.2f%%, %.2f%%)" % (top1_ori - top1, top5_ori - top5)
+	print "best loss = %.2f" %(np.min(y_loss))
 	x = [x * 5000 for x in xrange(len(y_loss))]
 	subplot(1, 3, 1)
 	plot(x, y_loss)
