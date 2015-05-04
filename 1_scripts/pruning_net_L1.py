@@ -49,7 +49,7 @@ def analyze_param(net, layers):
 
 # options defined here:
 analyze_only = 0
-folder = "/L2/"
+folder = "/L1_3/"
 
 prototxt = caffe_root + '/3_prototxt_solver/' + folder + 'train_val.prototxt'
 caffemodel = caffe_root + '/4_model_checkpoint/0_original_dense/' + folder + 'bvlc_alexnet.caffemodel'
@@ -73,7 +73,7 @@ output_prefix = caffe_root + '/4_model_checkpoint/1_before_retrain/' + folder + 
 # threshold_list = [0.46, 0.72, 1.05, 1.27, 1.44, 1.58, 1.70, 1.81, 1.91, 2.00]
 # threshold_list = [0, 0.25, 0.69, 1.06, 1.35, 1.59, 1.80, 1.99, 2.16, 2.32]
 # threshold_list = np.arange(0, 2.50, 0.01)
-threshold_list = np.arange(2.00, 3.00, 0.01)
+threshold_list = np.arange(2.4, 3.00, 0.01)
 
 print "threshold list is", threshold_list
 fout = open(caffe_root + '/2_results/' + folder + 'parameter_cnt_' + suffix + '.csv', 'a')
@@ -108,8 +108,8 @@ def prune(threshold):
         if layer == layers_tbd[1]:
             local_threshold = threshold
         if layer == layers_tbd[2]:
-            local_threshold = threshold / 2
-            if local_threshold > 1.3: local_threshold = 1.3
+            local_threshold = threshold / 1.5
+#             if local_threshold > 1.3: local_threshold = 1.3
 
         mask = (np.abs(W) > (hi * local_threshold))
         mask = np.bool_(mask)
@@ -121,12 +121,8 @@ def prune(threshold):
 
     (total_percentage, percentage_list) = analyze_param(net, layers)
     output_model = output_prefix + str(threshold) + '_' + suffix + ".caffemodel"
-    net.save(output_model)
+#     net.save(output_model)
     return (threshold, total_percentage, percentage_list)
-
-# Parallel version for this code:
-# for threshold in threshold_list:
-#     prune(threshold, layers, layers_tbd, fout, output_prefix)
 
 results = Parallel(n_jobs=num_cores)(delayed(prune)(threshold) for threshold in threshold_list)
 

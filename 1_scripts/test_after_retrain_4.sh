@@ -1,11 +1,11 @@
 #!/bin/bash
-
+#need two arguments: begin, end
 
 suffix=""
-model="$CAFFE_ROOT/3_prototxt_solver/L1_3/train_val.prototxt"
-# filename_prefix="$CAFFE_ROOT/4_model_checkpoint/2_after_retrain/prune$1_iter_"
-filename_prefix="/cnn/caffemodel/caffe_alexnet_train1_iter_"
-output=result_$start_$end.csv
+model="$CAFFE_ROOT/3_prototxt_solver/L2/train_val0.46.prototxt"
+# model="$CAFFE_ROOT/3_prototxt_solver/L1_3/train_val.prototxt"
+filename_prefix="$CAFFE_ROOT/4_model_checkpoint/2_after_retrain/L2/prune1.44_iter_"
+# filename_prefix="/cnn/caffemodel/caffe_alexnet_train1_iter_"
 
 if [ "$1" -gt "$2" ]; then
     let start=$2
@@ -15,6 +15,7 @@ else
     let end=$2
 fi
 
+output=result_$start_$end.csv
 tmp1=.`date +"%T.%3N"`.tmp
 tmp2=.`date +"%T.%3N"`.tmp
 tmp3=.`date +"%T.%3N"`.tmp
@@ -22,7 +23,6 @@ tmp4=.`date +"%T.%3N"`.tmp
 
 for i in $(seq $end -20000 $start);
 do    
-    echo $i
     let data1=$i
     let data2=$data1-5000
     let data3=$data2-5000
@@ -45,10 +45,10 @@ do
     filename2=$filename_prefix$data2"$suffix.caffemodel"        
     filename3=$filename_prefix$data3"$suffix.caffemodel"        
     filename4=$filename_prefix$data4"$suffix.caffemodel"        
-    echo $result1
-    echo $result2
-    echo $result3
-    echo $result4
+    echo $filename1
+    echo $filename2
+    echo $filename3
+    echo $filename4
     rm -rf $tmp1
     rm -rf $tmp2
     rm -rf $tmp3
@@ -58,9 +58,9 @@ do
     # echo $CAFFE_ROOT/build/tools/caffe test --model=$model --weights=$filename3  --iterations=1000 -gpu 2 
     # echo $CAFFE_ROOT/build/tools/caffe test --model=$model --weights=$filename4  --iterations=1000 -gpu 3 
     ./build/tools/caffe test --model=$model --weights=$filename1  --iterations=1000 -gpu 0 >$tmp1 2>&1  &
-    ./build/tools/caffe test --model=$model --weights=$filename2  --iterations=1000 -gpu 0 >$tmp2 2>&1  &
-    ./build/tools/caffe test --model=$model --weights=$filename3  --iterations=1000 -gpu 1 >$tmp3 2>&1  &
-    ./build/tools/caffe test --model=$model --weights=$filename4  --iterations=1000 -gpu 1 >$tmp4 2>&1  &
+    ./build/tools/caffe test --model=$model --weights=$filename2  --iterations=1000 -gpu 1 >$tmp2 2>&1  &
+    ./build/tools/caffe test --model=$model --weights=$filename3  --iterations=1000 -gpu 2 >$tmp3 2>&1  &
+    ./build/tools/caffe test --model=$model --weights=$filename4  --iterations=1000 -gpu 3 >$tmp4 2>&1  &
     echo "waiting..."
     wait
     echo "done"
