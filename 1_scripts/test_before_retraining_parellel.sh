@@ -1,9 +1,11 @@
 #!/bin/bash
 #no argument required
 thresh_list=(0.46 0.72 1.05 1.27 1.44 1.58 1.70 1.81 1.91 2.00)
-folder=L2
-suffix=layerwise_
-layers=fc6
+thresh_list=(2.64 3.38)
+folder=L1_3
+# suffix=layerwise_
+suffix=alex_pruned
+layers=fc678
 
 model="$CAFFE_ROOT/3_prototxt_solver/$folder/train_val.prototxt"
 output="$CAFFE_ROOT/2_results/$folder/acc_before_retrain_$layers.csv"

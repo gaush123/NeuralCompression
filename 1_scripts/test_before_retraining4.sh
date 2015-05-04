@@ -2,12 +2,12 @@
 # no argument required
 # thresh_list=(0.46 0.72 1.05 1.27 1.44 1.58 1.70 1.81 1.91 2.00)
 # thresh_list=(0 0.25 0.69 1.06 1.35 1.59 1.80 1.99 2.16 2.32)
-thresh_list=(0.08 2.76 3.51)
+thresh_list=(0.08 2.32 2.64 3.38)
 folder=L1_3
 #suffix="fc678"
 suffix="678half"
 #suffix_2="layerwise_"
-suffix_2="tails_alex_pruned_"
+suffix_2="alex_pruned_"
 
 model="$CAFFE_ROOT/3_prototxt_solver/$folder/train_val.prototxt"
 output="$CAFFE_ROOT/2_results/$folder/acc_before_retrain_$suffix.csv"
