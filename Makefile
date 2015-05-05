@@ -1,11 +1,19 @@
 PROJECT := caffe
 
 CONFIG_FILE := Makefile.config
+# Explicitly check for the config file, otherwise make -k will proceed anyway.
+ifeq ($(wildcard $(CONFIG_FILE)),)
+$(error $(CONFIG_FILE) not found. See $(CONFIG_FILE).example.)
+endif
 include $(CONFIG_FILE)
 
 BUILD_DIR_LINK := $(BUILD_DIR)
-RELEASE_BUILD_DIR ?= .$(BUILD_DIR)_release
-DEBUG_BUILD_DIR ?= .$(BUILD_DIR)_debug
+ifeq ($(RELEASE_BUILD_DIR),)
+	RELEASE_BUILD_DIR := .$(BUILD_DIR)_release
+endif
+ifeq ($(DEBUG_BUILD_DIR),)
+	DEBUG_BUILD_DIR := .$(BUILD_DIR)_debug
+endif
 
 DEBUG ?= 0
 ifeq ($(DEBUG), 1)
