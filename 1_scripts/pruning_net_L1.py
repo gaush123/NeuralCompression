@@ -70,7 +70,8 @@ suffix_2 = 'alex_pruned_'
 # suffix_2 = 'layerwise_'
 output_prefix = caffe_root + '/4_model_checkpoint/1_before_retrain/' + folder + suffix_2
 # threshold_list = [0.46, 0.72, 1.05, 1.27, 1.44, 1.58, 1.70, 1.81, 1.91, 2.00]
-threshold_list = np.arange(2.68, 2.93, 3.38)
+threshold_list = [2.68, 2.93, 3.77]
+# threshold_list = np.arange(3.6, 3.8, 0.01)
 
 print "threshold list is", threshold_list
 fout = open(caffe_root + '/2_results/' + folder + 'parameter_cnt_' + suffix + '.csv', 'a')
@@ -105,8 +106,7 @@ def prune(threshold):
         if layer == layers_tbd[1]:
             local_threshold = threshold
         if layer == layers_tbd[2]:
-            if threshold < 2.5:
-                local_threshold = threshold / 2
+            local_threshold = threshold / 2
 
         mask = (np.abs(W) > (hi * local_threshold))
         mask = np.bool_(mask)

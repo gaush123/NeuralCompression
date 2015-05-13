@@ -2,12 +2,14 @@
 # no argument required
 # thresh_list=(0.46 0.72 1.05 1.27 1.44 1.58 1.70 1.81 1.91 2.00)
 # thresh_list=(0 0.25 0.69 1.06 1.35 1.59 1.80 1.99 2.16 2.32)
-thresh_list=(0.08 2.32 2.64 3.38)
-folder=L1_3
-#suffix="fc678"
-suffix="678half"
+# thresh_list=(0.08 2.32 2.64 3.38)
+thresh_list=(0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9)
+folder=L2_conv
+# suffix="678half"
+suffix="all"
 #suffix_2="layerwise_"
-suffix_2="alex_pruned_"
+# suffix_2="alex_pruned_"
+suffix_2="conv_all_"
 
 model="$CAFFE_ROOT/3_prototxt_solver/$folder/train_val.prototxt"
 output="$CAFFE_ROOT/2_results/$folder/acc_before_retrain_$suffix.csv"
@@ -33,10 +35,10 @@ do
     data3=${thresh_list[4*i+2]}
     data4=${thresh_list[4*i+3]}
 	
-	data1=`printf "%.2f" $data1`
-	data2=`printf "%.2f" $data2`
-	data3=`printf "%.2f" $data3`
-	data4=`printf "%.2f" $data4`
+# 	data1=`printf "%.2f" $data1`
+# 	data2=`printf "%.2f" $data2`
+# 	data3=`printf "%.2f" $data3`
+# 	data4=`printf "%.2f" $data4`
 
 	result1=$data1
 	result2=$data2
@@ -50,14 +52,18 @@ do
 	echo $result2
 	echo $result3
 	echo $result4
+	echo $filename1
+	echo $filename2
+	echo $filename3
+	echo $filename4
 	rm -rf $tmp1
 	rm -rf $tmp2
 	rm -rf $tmp3
 	rm -rf $tmp4
-# 	echo ./build/tools/caffe test --model=$model --weights=$filename1  --iterations=1000 -gpu 1 
-	# echo $CAFFE_ROOT/build/tools/caffe test --model=$model --weights=$filename2  --iterations=1000 -gpu 1 
-	# echo $CAFFE_ROOT/build/tools/caffe test --model=$model --weights=$filename3  --iterations=1000 -gpu 2 
-	# echo $CAFFE_ROOT/build/tools/caffe test --model=$model --weights=$filename4  --iterations=1000 -gpu 3 
+	echo ./build/tools/caffe test --model=$model --weights=$filename1  --iterations=1000 -gpu 1 
+	echo $CAFFE_ROOT/build/tools/caffe test --model=$model --weights=$filename2  --iterations=1000 -gpu 1 
+	echo $CAFFE_ROOT/build/tools/caffe test --model=$model --weights=$filename3  --iterations=1000 -gpu 2 
+	echo $CAFFE_ROOT/build/tools/caffe test --model=$model --weights=$filename4  --iterations=1000 -gpu 3 
 	./build/tools/caffe test --model=$model --weights=$filename1  --iterations=1000 -gpu 0 >$tmp1 2>&1  &
 	./build/tools/caffe test --model=$model --weights=$filename2  --iterations=1000 -gpu 1 >$tmp2 2>&1  &
 	./build/tools/caffe test --model=$model --weights=$filename3  --iterations=1000 -gpu 2 >$tmp3 2>&1  &

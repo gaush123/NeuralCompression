@@ -2,9 +2,9 @@
 #need two arguments: begin, end
 
 suffix=""
-model="$CAFFE_ROOT/3_prototxt_solver/L2/train_val0.46.prototxt"
+model="$CAFFE_ROOT/3_prototxt_solver/L2/train_val1.44.prototxt"
 # model="$CAFFE_ROOT/3_prototxt_solver/L1_3/train_val.prototxt"
-filename_prefix="$CAFFE_ROOT/4_model_checkpoint/2_after_retrain/L2/prune1.44_iter_"
+filename_prefix="$CAFFE_ROOT/4_model_checkpoint/2_after_retrain/L2/prune1.44_0.3_iter_"
 # filename_prefix="/cnn/caffemodel/caffe_alexnet_train1_iter_"
 
 if [ "$1" -gt "$2" ]; then
