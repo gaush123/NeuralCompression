@@ -1,0 +1,21 @@
+
+test_initialization: false
+average_loss : 100
+snapshot_diff : false
+net: "./3_prototxt_solver/L1_3/train_val0.22.prototxt"
+test_iter: 1000
+test_interval: 5000
+base_lr: 1e-5 # origianlly 1e-2
+lr_policy: "step"
+gamma: 0.1
+stepsize: 400000
+display: 20
+max_iter: 1200000
+momentum: 0.9
+weight_decay: 5e-4   #origianlly 5e-4->5e-6
+snapshot: 5000
+snapshot_prefix: "./4_model_checkpoint/2_after_retrain/L1_3/prune1.59_L2_"
+solver_mode: GPU
+
+regularization_type: "L2"
+solver_type: NESTEROV
