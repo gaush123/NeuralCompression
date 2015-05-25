@@ -53,16 +53,10 @@ folder = "/L2/"
 
 prototxt = caffe_root + '/3_prototxt_solver/' + folder + 'train_val.prototxt'
 caffemodel = caffe_root + '/4_model_checkpoint/0_original_dense/' + folder + 'bvlc_alexnet.caffemodel'
-if folder[2] == '1':
-    layers = ['conv1', 'conv2', 'conv3', 'conv4', 'conv5', 'fc6_new', 'fc7_new', 'fc8_new']
-    layers_tbd = [ 'fc6_new', 'fc7_new', 'fc8_new']
-#     layers_tbd = ['fc8']
-if folder[2] == '2':
-    layers = ['conv1', 'conv2', 'conv3', 'conv4', 'conv5', 'fc6', 'fc7', 'fc8']
-    layers_tbd = [ 'fc6', 'fc7', 'fc8']
-#     layers_tbd = ['fc8']
-else:
-    print "error"
+caffemodel = caffe_root + '/4_model_checkpoint/2_after_retrain/' + folder + "conv1.44_0.8_iter_675000.caffemodel"
+layers = ['conv1', 'conv2', 'conv3', 'conv4', 'conv5', 'fc6', 'fc7', 'fc8']
+layers_tbd = [ 'fc6', 'fc7', 'fc8']
+
 
 suffix = '678half'
 # suffix = 'fc678'
@@ -74,7 +68,7 @@ output_prefix = caffe_root + '/4_model_checkpoint/1_before_retrain/' + folder + 
 # threshold_list = [0, 0.25, 0.69, 1.06, 1.35, 1.59, 1.80, 1.99, 2.16, 2.32]
 # threshold_list = np.arange(0, 2.50, 0.01)
 # threshold_list = np.arange(2.00, 3.00, 0.01)
-threshold_list = [2.02, 2.13, 2.27, 2.46, 2.78]
+threshold_list = [0.4, 0.8, 1.2, 1.6, 1.8, 2.0]
 
 print "threshold list is", threshold_list
 fout = open(caffe_root + '/2_results/' + folder + 'parameter_cnt_' + suffix + '.csv', 'a')

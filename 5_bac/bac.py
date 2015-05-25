@@ -23,13 +23,13 @@ def hist_param_data(net):
         numBins = 2 ^ 8
         W = net.params[layer][0].data
         D = net.blobs[layer].data
-        plt.subplot(3, 2, 2 * i);
-        plt.hist(W.flatten(), numBins, color='blue', alpha=0.8)
-        plt.subplot(3, 2, 2 * i + 1);
-        plt.hist(D.flatten(), numBins, color='blue', alpha=0.8)
+#         plt.subplot(3, 2, 2 * i);
+#         plt.hist(W.flatten(), numBins, color='blue', alpha=0.8)
+#         plt.subplot(3, 2, 2 * i + 1);
+#         plt.hist(D.flatten(), numBins, color='blue', alpha=0.8)
         sio.savemat("oriW_" + layer, {"W_" + layer: W})
         sio.savemat("oriD_" + layer, {"D_" + layer: D})
-    plt.show()
+#     plt.show()
 
 
 
@@ -95,6 +95,8 @@ prototxt = caffe_root + '/5_bac/' + 'train_val1.44.prototxt'
 # caffemodel = caffe_root + '/4_model_checkpoint/2_after_retrain/' + folder + "conv1.44_0.8_iter_675000.caffemodel"
 caffemodel = caffe_root + "/4_model_checkpoint/0_original_dense/L2/bvlc_alexnet.caffemodel"
 # caffemodel = caffe_root + "/4_model_checkpoint/2_after_retrain/L1_3/prune1.59_iter_610000.caffemodel"
+caffemodel = caffe_root + '/4_model_checkpoint/2_after_retrain/' + folder + "conv1.44_0.8_iter_675000.caffemodel"
+
 
 if folder[2] == '1':
     layers = ['conv1', 'conv2', 'conv3', 'conv4', 'conv5', 'fc6_new', 'fc7_new', 'fc8_new']
@@ -114,6 +116,6 @@ hist_param_data(net)
 
 command = caffe_root + "/build/tools/caffe test --model=" + prototxt + " --weights=" + caffemodel + " --iterations=1000 --gpu 1"
 print command
-# os.system(command)
+os.system(command)
 
 
