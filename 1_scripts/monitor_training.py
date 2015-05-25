@@ -30,13 +30,13 @@ caffe_root = os.environ["CAFFE_ROOT"]
 if len(sys.argv) == 2:
 	fileName = sys.argv[1]
 	os.system(caffe_root + '/1_scripts/' + folder + 'extract_trace.sh ' + fileName)
-	fileName1 = caffe_root + "/2_results/" + folder + "train_loss.csv"
-	fileName2 = caffe_root + "/2_results/" + folder + "train_acc_top1.csv"
-	fileName3 = caffe_root + "/2_results/" + folder + "train_acc_top5.csv"
+	# fileName1 = caffe_root + "/2_results/" + folder + "train_loss.csv"
+	# fileName2 = caffe_root + "/2_results/" + folder + "train_acc_top1.csv"
+	# fileName3 = caffe_root + "/2_results/" + folder + "train_acc_top5.csv"
 	fileName4 = caffe_root + "/2_results/" + folder + "test_loss.csv"
 	fileName5 = caffe_root + "/2_results/" + folder + "test_acc_top1.csv"
 	fileName6 = caffe_root + "/2_results/" + folder + "test_acc_top5.csv"
-
+	"""
 	y_loss = analyze_log_ave(fileName1)
 	y_top1 = analyze_log_ave(fileName2)
 	y_top5 = analyze_log_ave(fileName3)
@@ -55,6 +55,7 @@ if len(sys.argv) == 2:
 	plot(x, y_top5, 'r')
 	title ("training accuracy_top5")
 	draw()
+	"""
 
 	figure()
 
@@ -77,7 +78,7 @@ if len(sys.argv) == 2:
 	top5 = y_top5[idx] * 100
 	print "\nbest top1 accuracy (*%.2f%%*, %.2f%%)" % (top1, top5)
 	print "=> accuracy loss   (%.2f%%, %.2f%%)" % (top1_ori - top1, top5_ori - top5)
-	print "best loss = %.2f" %(np.min(y_loss))
+	print "best loss = %.2f" % (np.min(y_loss))
 	x = [x * 5000 for x in xrange(len(y_loss))]
 	subplot(1, 3, 1)
 	plot(x, y_loss)
