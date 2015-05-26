@@ -68,8 +68,8 @@ def analyze_param(net, layers):
 
 folder = "/L2/"
 prototxt = caffe_root + '/3_prototxt_solver/' + folder + 'train_val.prototxt'
-# caffemodel = caffe_root + '/4_model_checkpoint/2_after_retrain/L2/' + "prune1.2_smalldrop_iter_550000.caffemodel"
-caffemodel = caffe_root + '/4_model_checkpoint/1_before_retrain/L2/' + "alex_pruned_1.44_678half.caffemodel"
+caffemodel = caffe_root + '/4_model_checkpoint/2_after_retrain/L2/' + "prune12x_iter_200000.caffemodel"
+# caffemodel = caffe_root + '/4_model_checkpoint/1_before_retrain/L2/' + "alex_pruned_1.44_678half.caffemodel"
 # caffemodel = caffe_root + '/4_model_checkpoint/1_before_retrain/L2/' + "alex_pruned_1.27_678half.caffemodel"
 # caffemodel = caffe_root + '/4_model_checkpoint/1_before_retrain/L2/' + "alex_pruned_1.58_678half.caffemodel"
 if folder[2] == '1':
@@ -83,6 +83,6 @@ analyze_param(net, layers)
 
 command = caffe_root + "/build/tools/caffe test --model=" + prototxt + " --weights=" + caffemodel + " --iterations=1000 --gpu 3"
 print command
-# os.system(command)
+os.system(command)
 
 
