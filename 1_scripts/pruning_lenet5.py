@@ -49,26 +49,23 @@ def analyze_param(net, layers):
 
 # options defined here:
 analyze_only = 0
-folder = "/L2/"
+save_net = 1
+folder = "/lenet5/"
+
 
 prototxt = caffe_root + '/3_prototxt_solver/' + folder + 'train_val.prototxt'
-caffemodel = caffe_root + '/4_model_checkpoint/0_original_dense/' + folder + 'bvlc_alexnet.caffemodel'
-caffemodel = caffe_root + '/4_model_checkpoint/2_after_retrain/' + folder + "conv1.44_0.8_iter_675000.caffemodel"
-layers = ['conv1', 'conv2', 'conv3', 'conv4', 'conv5', 'fc6', 'fc7', 'fc8']
-layers_tbd = [ 'fc6', 'fc7', 'fc8']
+# caffemodel = caffe_root + '/4_model_checkpoint/0_original_dense/' + folder + 'lenet_iter_10000.caffemodel'
+caffemodel = caffe_root + '/4_model_checkpoint/0_original_dense/' + folder + 'lenet_relu_0.992.caffemodel'
+layers = ['conv1', 'conv2', 'ip1', 'ip2']
+layers_tbd = ['conv1', 'conv2', 'ip1', 'ip2']
 
-
-suffix = '678half'
-# suffix = 'fc678'
-suffix_2 = 'tails_alex_pruned_'
-# suffix_2 = 'layerwise_'
+suffix = 'relu_all'
+suffix_2 = 'lenet_'
 output_prefix = caffe_root + '/4_model_checkpoint/1_before_retrain/' + folder + suffix_2
-# threshold_list = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2.0, 2.1, 2.2, 2.3]
-# threshold_list = [0.46, 0.72, 1.05, 1.27, 1.44, 1.58, 1.70, 1.81, 1.91, 2.00]
-# threshold_list = [0, 0.25, 0.69, 1.06, 1.35, 1.59, 1.80, 1.99, 2.16, 2.32]
-# threshold_list = np.arange(0, 2.50, 0.01)
+threshold_list = [  1.46, 1.49, 1.50, 1.51, 1.53, 1.55, 1.56, 1.61]
+
+
 # threshold_list = np.arange(2.00, 3.00, 0.01)
-threshold_list = [0.4, 0.8, 1.2, 1.6, 1.8, 2.0]
 
 print "threshold list is", threshold_list
 fout = open(caffe_root + '/2_results/' + folder + 'parameter_cnt_' + suffix + '.csv', 'a')
@@ -97,14 +94,15 @@ def prune(threshold):
         b = net.params[layer][1].data
         # hi = np.max(np.abs(W.flatten()))
         hi = np.std(W.flatten())
-        # local_threshold is different for each layer:
+        local_threshold = threshold
         if layer == layers_tbd[0]:
-            local_threshold = threshold
+            local_threshold = 0.5  # 0.4
         if layer == layers_tbd[1]:
             local_threshold = threshold
         if layer == layers_tbd[2]:
-            local_threshold = threshold / 1.5
-#             if local_threshold > 1.3: local_threshold = 1.3
+            local_threshold = threshold  # -0.1
+        if layer == layers_tbd[3]:
+            local_threshold = threshold - 0.2  # -0.3
 
         mask = (np.abs(W) > (hi * local_threshold))
         mask = np.bool_(mask)
@@ -116,12 +114,10 @@ def prune(threshold):
 
     (total_percentage, percentage_list) = analyze_param(net, layers)
     output_model = output_prefix + str(threshold) + '_' + suffix + ".caffemodel"
-    net.save(output_model)
+    if save_net == 1:
+        net.save(output_model)
     return (threshold, total_percentage, percentage_list)
 
-# Parallel version for this code:
-# for threshold in threshold_list:
-#     prune(threshold, layers, layers_tbd, fout, output_prefix)
 
 results = Parallel(n_jobs=num_cores)(delayed(prune)(threshold) for threshold in threshold_list)
 
@@ -131,7 +127,7 @@ for (threshold, total_percentage, percentage_list) in results:
     fout.write("%4.2f, %.5f,\n" % (threshold, total_percentage))
 
 for (threshold, total_percentage, percentage_list) in results:
-    fout2.write("%4.2f, %.5f, %.5f, %.5f\n" % (threshold, percentage_list[-3], percentage_list[-2], percentage_list[-1]))
+    fout2.write("%4.2f, %.5f, %.5f, %.5f, %.5f,\n" % (threshold, percentage_list[0], percentage_list[1], percentage_list[2], percentage_list[3]))
 
 fout.close()
 fout2.close()
