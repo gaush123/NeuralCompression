@@ -3,13 +3,14 @@
 # thresh_list=(0.46 0.72 1.05 1.27 1.44 1.58 1.70 1.81 1.91 2.00)
 # thresh_list=(0 0.25 0.69 1.06 1.35 1.59 1.80 1.99 2.16 2.32)
 # thresh_list=(0.08 2.32 2.64 3.38)
-thresh_list=(0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9)
-folder=L2_conv
-# suffix="678half"
-suffix="all"
+thresh_list=(0.4 1.21 1.6 1.88 2.1 2.42 2.55)
+folder=L2
+suffix="678half"
+# suffix="all"
 #suffix_2="layerwise_"
 # suffix_2="alex_pruned_"
 suffix_2="conv_all_"
+suffix_2='alex_pruned_afterConv_'
 
 model="$CAFFE_ROOT/3_prototxt_solver/$folder/train_val.prototxt"
 output="$CAFFE_ROOT/2_results/$folder/acc_before_retrain_$suffix.csv"

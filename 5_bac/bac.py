@@ -43,10 +43,13 @@ def analyze_param(net, layers):
         i += 1
         W = net.params[layer][0].data
         b = net.params[layer][1].data
-
+        m = net.params[layer][0].mask
         print layer,
         print "kernel shape=", W.shape
-
+        mask_non_zero = np.count_nonzero(m.flatten())  # + np.count_nonzero(b.flatten())
+        mask_all_param = np.prod(m.shape)  # + np.prod(b.shape)
+        print "mask_all_param is", mask_all_param
+        print "mask_non_zero is ", mask_non_zero
 #         print 'W(%d) range = [%f, %f]' % (i, min(W.flatten()), max(W.flatten()))
 #         print 'W(%d) mean = %f, std = %f' % (i, np.mean(W.flatten()), np.std(W.flatten()))
         non_zero = np.count_nonzero(W.flatten())  # + np.count_nonzero(b.flatten())
@@ -88,7 +91,7 @@ def analyze_data(net, layers):
 
 
 
-folder = "/L2_conv/"
+folder = "/L2/"
 prototxt = caffe_root + '/5_bac/' + 'train_val1.44.prototxt'
 # caffemodel = caffe_root + '/4_model_checkpoint/2_after_retrain/L2/' + "prune1.44_iter_800000.caffemodel"
 # caffemodel = caffe_root + '/4_model_checkpoint/1_before_retrain/L2/' + "alex_pruned_1.44_678half.caffemodel"
@@ -96,6 +99,7 @@ prototxt = caffe_root + '/5_bac/' + 'train_val1.44.prototxt'
 caffemodel = caffe_root + "/4_model_checkpoint/0_original_dense/L2/bvlc_alexnet.caffemodel"
 # caffemodel = caffe_root + "/4_model_checkpoint/2_after_retrain/L1_3/prune1.59_iter_610000.caffemodel"
 caffemodel = caffe_root + '/4_model_checkpoint/2_after_retrain/' + folder + "conv1.44_0.8_iter_675000.caffemodel"
+caffemodel = caffe_root + '/4_model_checkpoint/1_before_retrain/' + folder + "alex_pruned_afterConv_2.1_678half.caffemodel"
 
 
 if folder[2] == '1':
@@ -110,9 +114,9 @@ net.forward()
 layers = net.params.keys()
 blobs = net.blobs.keys()
 
-# analyze_param(net, layers)
+analyze_param(net, layers)
 # analyze_data(net, blobs)
-hist_param_data(net)
+# hist_param_data(net)
 
 command = caffe_root + "/build/tools/caffe test --model=" + prototxt + " --weights=" + caffemodel + " --iterations=1000 --gpu 1"
 print command

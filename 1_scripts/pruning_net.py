@@ -52,23 +52,21 @@ analyze_only = 0
 folder = "/L2/"
 
 prototxt = caffe_root + '/3_prototxt_solver/' + folder + 'train_val.prototxt'
-caffemodel = caffe_root + '/4_model_checkpoint/0_original_dense/' + folder + 'bvlc_alexnet.caffemodel'
-caffemodel = caffe_root + '/4_model_checkpoint/2_after_retrain/' + folder + "conv1.44_0.8_iter_675000.caffemodel"
+# caffemodel = caffe_root + '/4_model_checkpoint/0_original_dense/' + folder + 'bvlc_alexnet.caffemodel'
+caffemodel = caffe_root + '/4_model_checkpoint/2_after_retrain/L2_conv/conv1.44_0.8_iter_675000.caffemodel'
 layers = ['conv1', 'conv2', 'conv3', 'conv4', 'conv5', 'fc6', 'fc7', 'fc8']
 layers_tbd = [ 'fc6', 'fc7', 'fc8']
 
 
 suffix = '678half'
 # suffix = 'fc678'
-suffix_2 = 'tails_alex_pruned_'
+suffix_2 = 'alex_pruned_afterConv_'
 # suffix_2 = 'layerwise_'
 output_prefix = caffe_root + '/4_model_checkpoint/1_before_retrain/' + folder + suffix_2
-# threshold_list = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2.0, 2.1, 2.2, 2.3]
-# threshold_list = [0.46, 0.72, 1.05, 1.27, 1.44, 1.58, 1.70, 1.81, 1.91, 2.00]
-# threshold_list = [0, 0.25, 0.69, 1.06, 1.35, 1.59, 1.80, 1.99, 2.16, 2.32]
-# threshold_list = np.arange(0, 2.50, 0.01)
-# threshold_list = np.arange(2.00, 3.00, 0.01)
-threshold_list = [0.4, 0.8, 1.2, 1.6, 1.8, 2.0]
+threshold_list = [0, 0.4, 2.0, 2.1, 2.42]
+threshold_list = [0, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2.0, 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7]
+threshold_list = [1.22, 1.24, 1.26, 1.86, 1.88, 2.62, 2.64, 2.66, 2.68, 2.72, 2.74]
+threshold_list = [2.81, 2.82, 2.83, 2.84, 2.85, 2.86, 2.87, 2.88, 2.89, 2.9]
 
 print "threshold list is", threshold_list
 fout = open(caffe_root + '/2_results/' + folder + 'parameter_cnt_' + suffix + '.csv', 'a')
