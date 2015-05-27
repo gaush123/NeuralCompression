@@ -67,6 +67,7 @@ threshold_list = [0, 0.4, 2.0, 2.1, 2.42]
 threshold_list = [0, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2.0, 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7]
 threshold_list = [1.22, 1.24, 1.26, 1.86, 1.88, 2.62, 2.64, 2.66, 2.68, 2.72, 2.74]
 threshold_list = [2.81, 2.82, 2.83, 2.84, 2.85, 2.86, 2.87, 2.88, 2.89, 2.9]
+threshold_list = [0.4, 1.21, 1.6, 1.88, 2.1, 2.42, 2.55, 2.66, 2.76, 2.85]
 
 print "threshold list is", threshold_list
 fout = open(caffe_root + '/2_results/' + folder + 'parameter_cnt_' + suffix + '.csv', 'a')
