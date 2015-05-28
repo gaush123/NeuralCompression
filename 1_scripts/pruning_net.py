@@ -65,7 +65,7 @@ layers_tbd = [ 'fc6', 'fc7', 'fc8']
 suffix = '678fix'
 suffix_2 = 'afterConv7x_'
 output_prefix = caffe_root + '/4_model_checkpoint/1_before_retrain/' + folder + suffix_2
-threshold_list = [2.0, 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.8, 2.9, 3.0, 3.1]
+threshold_list = np.arange(1.5, 2.1, 0.1)
 
 print "threshold list is", threshold_list
 fout = open(caffe_root + '/2_results/' + folder + 'parameter_cnt_' + suffix + '.csv', 'a')
