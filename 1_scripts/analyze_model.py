@@ -72,6 +72,7 @@ caffemodel = caffe_root + '/4_model_checkpoint/2_after_retrain/L2/' + "prune12x_
 # caffemodel = caffe_root + '/4_model_checkpoint/1_before_retrain/L2/' + "alex_pruned_1.44_678half.caffemodel"
 # caffemodel = caffe_root + '/4_model_checkpoint/1_before_retrain/L2/' + "alex_pruned_1.27_678half.caffemodel"
 # caffemodel = caffe_root + '/4_model_checkpoint/1_before_retrain/L2/' + "alex_pruned_1.58_678half.caffemodel"
+caffemodel = caffe_root + '/4_model_checkpoint/0_original_dense/L2/prune7x_iter_195000.caffemodel'
 if folder[2] == '1':
     layers = ['conv1', 'conv2', 'conv3', 'conv4', 'conv5', 'fc6_new', 'fc7_new', 'fc8_new']
 if folder[2] == '2':
