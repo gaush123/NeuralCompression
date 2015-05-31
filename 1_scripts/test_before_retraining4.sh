@@ -6,16 +6,17 @@
 # thresh_list=(0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0 1.1 1.2 1.3 1.4 1.5 1.6 1.7 1.8 1.9 2.0 2.1 2.2 2.3)
 thresh_list=(0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0 1.1 1.2 1.3 1.4 1.5 1.6)
 folder=L2
-suffix="conv4"
+suffix="conv1"
 # suffix="all"
 # suffix_2="layerwise_" 
 # suffix_2="alex_pruned_"
 # suffix_2='alex_pruned_afterConv_'
 suffix_2="afterConv7x_"
+# suffix_2="afterConv8x_"
 
 
 model="$CAFFE_ROOT/3_prototxt_solver/$folder/train_val.prototxt"
-output="$CAFFE_ROOT/2_results/$folder/acc_before_retrain_$suffix.csv"
+output="$CAFFE_ROOT/2_results/$folder/acc_before_retrain_$suffix_2$suffix.csv"
 filename_prefix="$CAFFE_ROOT/4_model_checkpoint/1_before_retrain/$folder/$suffix_2"
 rm -rf $output
 
@@ -63,7 +64,7 @@ do
 	rm -rf $tmp2
 	rm -rf $tmp3
 	rm -rf $tmp4
-	echo $CAFFE_ROOT/build/tools/caffe test --model=$model --weights=$filename2  --iterations=1000 -gpu 0 
+	echo $CAFFE_ROOT/build/tools/caffe test --model=$model --weights=$filename1  --iterations=1000 -gpu 0 
 	echo $CAFFE_ROOT/build/tools/caffe test --model=$model --weights=$filename2  --iterations=1000 -gpu 1 
 	echo $CAFFE_ROOT/build/tools/caffe test --model=$model --weights=$filename3  --iterations=1000 -gpu 2 
 	echo $CAFFE_ROOT/build/tools/caffe test --model=$model --weights=$filename4  --iterations=1000 -gpu 3 
