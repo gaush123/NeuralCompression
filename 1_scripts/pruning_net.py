@@ -53,8 +53,9 @@ folder = "/L2/"
 
 prototxt = caffe_root + '/3_prototxt_solver/' + folder + 'train_val.prototxt'
 # caffemodel = caffe_root + '/4_model_checkpoint/0_original_dense/' + folder + 'bvlc_alexnet.caffemodel'
-# caffemodel = caffe_root + '/4_model_checkpoint/2_after_retrain/L2_conv/conv1.44_0.8_iter_675000.caffemodel'
-caffemodel = caffe_root + '/4_model_checkpoint/0_original_dense/L2/prune7x_iter_195000.caffemodel'
+# caffemodel = caffe_root + '/4_model_checkpoint/2_after_retrain/L2_conv/conv1.44_0.8_iter_675000.caffemodel' #after 6x
+# caffemodel = caffe_root + '/4_model_checkpoint/0_original_dense/L2/prune7x_iter_195000.caffemodel' #after 7x
+caffemodel = caffe_root + '/4_model_checkpoint/0_original_dense/L2/prune8x_iter_140000.caffemodel'  # after 8x
 layers = ['conv1', 'conv2', 'conv3', 'conv4', 'conv5', 'fc6', 'fc7', 'fc8']
 layers_tbd = [ 'fc6', 'fc7', 'fc8']
 
@@ -62,10 +63,12 @@ layers_tbd = [ 'fc6', 'fc7', 'fc8']
 
 
 # suffix = 'conv1'
-suffix = '678fix'
-suffix_2 = 'afterConv7x_'
+# suffix = '678fix'
+suffix = '678'
+# suffix_2 = 'afterConv7x_'
+suffix_2 = 'afterConv6x_'
 output_prefix = caffe_root + '/4_model_checkpoint/1_before_retrain/' + folder + suffix_2
-threshold_list = np.arange(1.5, 2.1, 0.1)
+threshold_list = np.arange(2.9, 4.1, 0.1)
 
 print "threshold list is", threshold_list
 fout = open(caffe_root + '/2_results/' + folder + 'parameter_cnt_' + suffix + '.csv', 'a')
@@ -80,6 +83,9 @@ numBins = 2 ^ 8
 if analyze_only:
     net = caffe.Net(prototxt, caffemodel, caffe.TEST)
     analyze_param(net, layers)
+    command = caffe_root + "/build/tools/caffe test --model=" + prototxt + " --weights=" + caffemodel + " --iterations=1000 --gpu 3"
+    print command
+    os.system(command)
     sys.exit(0)
 
 
