@@ -4,15 +4,17 @@
 # thresh_list=(0 0.25 0.69 1.06 1.35 1.59 1.80 1.99 2.16 2.32)
 # thresh_list=(0.08 2.32 2.64 3.38)
 # thresh_list=(0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0 1.1 1.2 1.3 1.4 1.5 1.6 1.7 1.8 1.9 2.0 2.1 2.2 2.3)
-thresh_list=(0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0 1.1 1.2 1.3 1.4 1.5 1.6)
+# thresh_list=(0.21 0.22 0.23 0.24 0.25 0.26 0.27 0.28 0.29 0.30 0.31 0.32 0.33 0.34)
+# thresh_list=(0.72 0.73 0.74 0.75 0.76 0.77 0.78 0.79 )
+thresh_list=(1.0 1.01 1.02 1.03 1.04 1.05 1.06 1.07 1.08 1.09 1.1)
 folder=L2
-suffix="conv1"
+suffix="conv3"
+suffix_2="afterConv8x_"
 # suffix="all"
 # suffix_2="layerwise_" 
 # suffix_2="alex_pruned_"
 # suffix_2='alex_pruned_afterConv_'
-suffix_2="afterConv7x_"
-# suffix_2="afterConv8x_"
+# suffix_2="afterConv7x_"
 
 
 model="$CAFFE_ROOT/3_prototxt_solver/$folder/train_val.prototxt"
@@ -97,9 +99,10 @@ do
 	echo $result4 >> $output
 
 done
+cat $output
 
-sort $output  > $tmp1 
-cat $tmp1> $output 
+# sort $output  > $tmp1 
+# cat $tmp1> $output 
 
 rm -rf $tmp1
 rm -rf $tmp2
