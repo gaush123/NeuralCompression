@@ -13,7 +13,7 @@ max_iter: 1000000
 momentum: 0.9
 weight_decay: 5e-4
 snapshot: 5000
-snapshot_prefix: "./4_model_checkpoint/2_after_retrain/L2/prune8x_"
+snapshot_prefix: "./4_model_checkpoint/2_after_retrain/L2/after8x_conv_1"
 solver_mode: GPU
 
 solver_type: NESTEROV
