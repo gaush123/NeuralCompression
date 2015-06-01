@@ -1,0 +1,15 @@
+net: "./3_prototxt_solver/vgg16/train_val_1.3.prototxt"
+#test_iter: 1000
+#test_interval: 250
+base_lr: 1e-4
+lr_policy: "step"
+gamma: 0.1
+stepsize: 800000
+display: 20
+max_iter: 1000000
+momentum: 0.9
+weight_decay: 5e-4
+snapshot: 2000
+snapshot_prefix: "/jpool.scratch/ML/data/4_model_checkpoint/2_after_retrain/vgg16/pruned1.3"
+solver_mode: GPU
+solver_type: NESTEROV
