@@ -64,14 +64,14 @@ layers_tbd = ['conv1', 'conv2', 'conv3', 'conv4', 'conv5']
 # suffix = 'conv3'
 
 # suffix = '678fix'
-suffix = 'ConvAll'
+suffix = 'fcAll'
 # suffix_2 = 'afterConv7x_'
 # suffix_2 = 'afterConv6x_'
 suffix_2 = 'afterConv8x_'
 output_prefix = caffe_root + '/4_model_checkpoint/1_before_retrain/' + folder + suffix_2
-# threshold_list = np.arange(2.9, 4.1, 0.1)
 threshold_list = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6]  # , 1.7, 1.8, 1.9, 2.0, 2.1, 2.2, 2.3]
-threshold_list = [4]
+threshold_list = [1.5, 1.6, 1.7, 1.8, 1.9]
+threshold_list = np.arange(1.5, 1.7, 0.01)
 
 print "threshold list is", threshold_list
 fout = open(caffe_root + '/2_results/' + folder + 'parameter_cnt_' + suffix + '.csv', 'a')
@@ -105,16 +105,16 @@ def prune(threshold):
         hi = np.std(W.flatten())
         # local_threshold is different for each layer:
         local_threshold = threshold
-        if layer == layers_tbd[0]:
-            local_threshold = 0.27
-        if layer == layers_tbd[1]:
-            local_threshold = 0.74
-        if layer == layers_tbd[2]:
-            local_threshold = 1.1
-        if layer == layers_tbd[3]:
-            local_threshold = 1.1
-        if layer == layers_tbd[4]:
-            local_threshold = 1.1
+#         if layer == layers_tbd[0]:
+#             local_threshold = 0.27
+#         if layer == layers_tbd[1]:
+#             local_threshold = 0.74
+        if layer == 'fc8':
+            local_threshold = 1
+#         if layer == layers_tbd[3]:
+#             local_threshold = 1.1
+#         if layer == layers_tbd[4]:
+#             local_threshold = 1.1
 
 #             if local_threshold > 1.3: local_threshold = 1.3
 

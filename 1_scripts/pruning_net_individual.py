@@ -59,11 +59,11 @@ caffemodel = caffe_root + '/4_model_checkpoint/0_original_dense/L2/prune8x_iter_
 layers = ['conv1', 'conv2', 'conv3', 'conv4', 'conv5', 'fc6', 'fc7', 'fc8']
 
 # modify begin
-layers_tbd = [ 'conv5']
-suffix = 'conv5'
+layers_tbd = [ 'fc6']
+suffix = 'fc6'
 threshold_list = np.arange(0.2, 0.35, 0.01)
-threshold_list = np.arange(0.7, 0.8, 0.01)
-threshold_list = np.arange(1.0, 1.1, 0.01)
+threshold_list = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2.0]
+
 # modify ends
 
 suffix_2 = 'afterConv8x_'
