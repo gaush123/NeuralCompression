@@ -541,14 +541,10 @@ TYPED_TEST(NeuronLayerTest, TestPReLUInPlace) {
   caffe_copy(ip2.blobs()[0]->count(), ip.blobs()[0]->cpu_data(),
       ip2.blobs()[0]->mutable_cpu_data());
   // Forward in-place
-  ip.Reshape(this->blob_bottom_vec_, this->blob_top_vec_);
   ip.Forward(this->blob_bottom_vec_, this->blob_top_vec_);
-  prelu.Reshape(this->blob_top_vec_, this->blob_top_vec_);
   prelu.Forward(this->blob_top_vec_, this->blob_top_vec_);
   // Forward non-in-place
-  ip2.Reshape(blob_bottom_vec_2, blob_middle_vec_2);
   ip2.Forward(blob_bottom_vec_2, blob_middle_vec_2);
-  prelu2.Reshape(blob_middle_vec_2, blob_top_vec_2);
   prelu2.Forward(blob_middle_vec_2, blob_top_vec_2);
   // Check numbers
   for (int s = 0; s < blob_top_2->count(); ++s) {
@@ -590,7 +586,7 @@ TYPED_TEST(NeuronLayerTest, TestPReLUInPlace) {
 
 #ifdef USE_CUDNN
 template <typename Dtype>
-class CuDNNNeuronLayerTest : public ::testing::Test {
+class CuDNNNeuronLayerTest : public GPUDeviceTest<Dtype> {
  protected:
   CuDNNNeuronLayerTest()
       : blob_bottom_(new Blob<Dtype>(2, 3, 4, 5)),
@@ -613,7 +609,6 @@ class CuDNNNeuronLayerTest : public ::testing::Test {
 TYPED_TEST_CASE(CuDNNNeuronLayerTest, TestDtypes);
 
 TYPED_TEST(CuDNNNeuronLayerTest, TestReLUCuDNN) {
-  Caffe::set_mode(Caffe::GPU);
   LayerParameter layer_param;
   CuDNNReLULayer<TypeParam> layer(layer_param);
   layer.SetUp(this->blob_bottom_vec_, this->blob_top_vec_);
@@ -628,7 +623,6 @@ TYPED_TEST(CuDNNNeuronLayerTest, TestReLUCuDNN) {
 }
 
 TYPED_TEST(CuDNNNeuronLayerTest, TestReLUGradientCuDNN) {
-  Caffe::set_mode(Caffe::GPU);
   LayerParameter layer_param;
   CuDNNReLULayer<TypeParam> layer(layer_param);
   GradientChecker<TypeParam> checker(1e-2, 1e-3, 1701, 0., 0.01);
@@ -637,7 +631,6 @@ TYPED_TEST(CuDNNNeuronLayerTest, TestReLUGradientCuDNN) {
 }
 
 TYPED_TEST(CuDNNNeuronLayerTest, TestReLUWithNegativeSlopeCuDNN) {
-  Caffe::set_mode(Caffe::GPU);
   LayerParameter layer_param;
   CHECK(google::protobuf::TextFormat::ParseFromString(
       "relu_param { negative_slope: 0.01 }", &layer_param));
@@ -657,7 +650,6 @@ TYPED_TEST(CuDNNNeuronLayerTest, TestReLUWithNegativeSlopeCuDNN) {
 }
 
 TYPED_TEST(CuDNNNeuronLayerTest, TestReLUGradientWithNegativeSlopeCuDNN) {
-  Caffe::set_mode(Caffe::GPU);
   LayerParameter layer_param;
   CHECK(google::protobuf::TextFormat::ParseFromString(
       "relu_param { negative_slope: 0.01 }", &layer_param));
@@ -668,7 +660,6 @@ TYPED_TEST(CuDNNNeuronLayerTest, TestReLUGradientWithNegativeSlopeCuDNN) {
 }
 
 TYPED_TEST(CuDNNNeuronLayerTest, TestSigmoidCuDNN) {
-  Caffe::set_mode(Caffe::GPU);
   LayerParameter layer_param;
   CuDNNSigmoidLayer<TypeParam> layer(layer_param);
   layer.SetUp(this->blob_bottom_vec_, this->blob_top_vec_);
@@ -685,7 +676,6 @@ TYPED_TEST(CuDNNNeuronLayerTest, TestSigmoidCuDNN) {
 }
 
 TYPED_TEST(CuDNNNeuronLayerTest, TestSigmoidGradientCuDNN) {
-  Caffe::set_mode(Caffe::GPU);
   LayerParameter layer_param;
   CuDNNSigmoidLayer<TypeParam> layer(layer_param);
   GradientChecker<TypeParam> checker(1e-2, 1e-3, 1701, 0., 0.01);
@@ -694,7 +684,6 @@ TYPED_TEST(CuDNNNeuronLayerTest, TestSigmoidGradientCuDNN) {
 }
 
 TYPED_TEST(CuDNNNeuronLayerTest, TestTanHCuDNN) {
-  Caffe::set_mode(Caffe::GPU);
   LayerParameter layer_param;
   CuDNNTanHLayer<TypeParam> layer(layer_param);
   layer.SetUp(this->blob_bottom_vec_, this->blob_top_vec_);
@@ -717,7 +706,6 @@ TYPED_TEST(CuDNNNeuronLayerTest, TestTanHCuDNN) {
 }
 
 TYPED_TEST(CuDNNNeuronLayerTest, TestTanHGradientCuDNN) {
-  Caffe::set_mode(Caffe::GPU);
   LayerParameter layer_param;
   CuDNNTanHLayer<TypeParam> layer(layer_param);
   GradientChecker<TypeParam> checker(1e-2, 1e-3);
