@@ -57,8 +57,8 @@ prototxt = caffe_root + '/3_prototxt_solver/' + folder + 'train_val.prototxt'
 # caffemodel = caffe_root + '/4_model_checkpoint/0_original_dense/L2/prune7x_iter_195000.caffemodel' #after 7x
 caffemodel = caffe_root + '/4_model_checkpoint/0_original_dense/L2/prune8x_iter_140000.caffemodel'  # after 8x
 layers = ['conv1', 'conv2', 'conv3', 'conv4', 'conv5', 'fc6', 'fc7', 'fc8']
-# layers_tbd = [ 'fc6', 'fc7', 'fc8']
-layers_tbd = ['conv1', 'conv2', 'conv3', 'conv4', 'conv5']
+# layers_tbd = ['conv1', 'conv2', 'conv3', 'conv4', 'conv5']
+layers_tbd = [ 'fc6', 'fc7', 'fc8']
 
 # layers_tbd = [ 'conv3']
 # suffix = 'conv3'
@@ -70,8 +70,8 @@ suffix = 'fcAll'
 suffix_2 = 'afterConv8x_'
 output_prefix = caffe_root + '/4_model_checkpoint/1_before_retrain/' + folder + suffix_2
 threshold_list = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6]  # , 1.7, 1.8, 1.9, 2.0, 2.1, 2.2, 2.3]
-threshold_list = [1.5, 1.6, 1.7, 1.8, 1.9]
-threshold_list = np.arange(1.5, 1.7, 0.01)
+threshold_list = [1.9, 2.2, 2.5, 2.6, 2.7, 2.8, 2.9, 3.0, 3.1, 3.2]
+threshold_list = np.arange(2.6, 2.7, 0.01)
 
 print "threshold list is", threshold_list
 fout = open(caffe_root + '/2_results/' + folder + 'parameter_cnt_' + suffix + '.csv', 'a')
