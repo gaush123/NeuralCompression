@@ -34,7 +34,7 @@ display: 100
 max_iter: 20000
 # snapshot intermediate results
 snapshot: 5000
-snapshot_prefix: "examples/mnist/lenet_300_100/lenet_300_100"
+snapshot_prefix: "4_model_checkpoint/0_original_dense/lenet_300_100/"
 # solver mode: CPU or GPU
 solver_mode: GPU
 solver_type: NESTEROV

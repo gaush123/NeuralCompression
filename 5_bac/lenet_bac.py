@@ -73,10 +73,14 @@ def analyze_data(net, layers):
 
 
 folder = "/lenet5/"
+folder = "/lenet_300_100/"
 prototxt = caffe_root + '/3_prototxt_solver/' + folder + 'train_val.prototxt'
 caffemodel = caffe_root + '/4_model_checkpoint/2_after_retrain/' + folder + 'best_pruned_lenet.caffemodel'
 caffemodel = caffe_root + '/4_model_checkpoint/2_after_retrain/' + folder + 'best/best_relu.caffemodel'
-layers = ['conv1', 'conv2', 'ip1', 'ip2']
+caffemodel = './4_model_checkpoint/2_after_retrain/lenet5/best/best_lenet5_12x_conv.caffemodel'
+caffemodel = './4_model_checkpoint/2_after_retrain/lenet_300_100/best/_iter_17500.caffemodel'
+# layers = ['conv1', 'conv2', 'ip1', 'ip2']
+layers = ['ip1', 'ip2', 'ip3']
 
 
 net = caffe.Net(prototxt, caffemodel, caffe.TEST)

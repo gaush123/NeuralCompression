@@ -11,6 +11,7 @@ import matplotlib.pyplot as plt
 
 os.system("cd $CAFFE_ROOT")
 caffe_root = os.environ["CAFFE_ROOT"]
+caffe_root = './'
 print "caffe_root is: ", caffe_root
 sys.path.insert(0, caffe_root + 'python')
 import caffe
@@ -55,14 +56,17 @@ folder = "/lenet_300_100/"
 
 prototxt = caffe_root + '/3_prototxt_solver/' + folder + 'train_val.prototxt'
 # caffemodel = caffe_root + '/4_model_checkpoint/0_original_dense/' + folder + 'lenet_iter_10000.caffemodel'
-caffemodel = caffe_root + '/4_model_checkpoint/0_original_dense/' + folder + 'lenet_300_100_iter_20000.caffemodel'
+caffemodel = caffe_root + '/4_model_checkpoint/0_original_dense/' + folder + '_iter_20000.caffemodel'
+caffemodel = './4_model_checkpoint/2_after_retrain/lenet_300_100/_iter_17500.caffemodel'
+
 layers = [ 'ip1', 'ip2', 'ip3']
 layers_tbd = [ 'ip1', 'ip2', 'ip3']
 
 suffix = 'all'
 suffix_2 = 'lenet300_100_'
 output_prefix = caffe_root + '/4_model_checkpoint/1_before_retrain/' + folder + suffix_2
-threshold_list = [ 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2.0]
+# threshold_list = [ 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2.0]
+threshold_list = np.arange(1.5, 2.5, 0.01)
 
 
 # threshold_list = np.arange(2.00, 3.00, 0.01)
@@ -101,7 +105,7 @@ def prune(threshold):
             local_threshold = threshold
         if layer == layers_tbd[2]:
             local_threshold = threshold
-            if local_threshold < 1.2:
+            if local_threshold > 1.2:
                 local_threshold = 1.2
 
 
