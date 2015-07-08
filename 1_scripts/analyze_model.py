@@ -66,7 +66,7 @@ def analyze_param(net, layers):
     return (total_nonzero / float(total_allparam), percentage_list)
 
 caffe.set_mode_gpu()
-caffe.set_device(0)
+caffe.set_device(2)
 
 folder = "/L2/"
 prototxt = caffe_root + '/3_prototxt_solver/' + folder + 'train_val.prototxt'
@@ -77,6 +77,9 @@ prototxt = caffe_root + '/3_prototxt_solver/' + folder + 'train_val.prototxt'
 # caffemodel = caffe_root + '/4_model_checkpoint/0_original_dense/L2/prune7x_iter_195000.caffemodel'
 caffemodel = './4_model_checkpoint/2_after_retrain/L2/prune10x_on8x_iter_205000.caffemodel'
 caffemodel = './4_model_checkpoint/1_before_retrain/L2/afterConv8x_1.9_fcAll.caffemodel'
+caffemodel = './4_model_checkpoint/2_after_retrain/L2/prune9x_on8x_iter_190000.caffemodel'
+caffemodel = './4_model_checkpoint/2_after_retrain/L2/prune9x_on8x2_iter_425000.caffemodel'
+
 if folder[2] == '1':
     layers = ['conv1', 'conv2', 'conv3', 'conv4', 'conv5', 'fc6_new', 'fc7_new', 'fc8_new']
 if folder[2] == '2':

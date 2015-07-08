@@ -19,6 +19,7 @@ import caffe
 
 def hist_param_data(net):
     layers = ["fc6", "fc7", "fc8"]
+    layers = ["conv1"]
     for i, layer in enumerate(layers):
         numBins = 2 ^ 8
         W = net.params[layer][0].data
@@ -27,8 +28,8 @@ def hist_param_data(net):
 #         plt.hist(W.flatten(), numBins, color='blue', alpha=0.8)
 #         plt.subplot(3, 2, 2 * i + 1);
 #         plt.hist(D.flatten(), numBins, color='blue', alpha=0.8)
-        sio.savemat("oriW_" + layer, {"W_" + layer: W})
-        sio.savemat("oriD_" + layer, {"D_" + layer: D})
+        sio.savemat("conv1" + layer, {"conv1": W})
+#         sio.savemat("oriD_" + layer, {"D_" + layer: D})
 #     plt.show()
 
 
@@ -61,6 +62,7 @@ def analyze_param(net, layers):
         print 'total W and b cnt = %d' % all_param
         print 'percentage = %f\n' % (this_layer_percentage)
         percentage_list.append(this_layer_percentage)
+
 
 
     print '=====> summary:'
@@ -96,16 +98,13 @@ prototxt = caffe_root + '/5_bac/' + 'train_val1.44.prototxt'
 # caffemodel = caffe_root + '/4_model_checkpoint/2_after_retrain/L2/' + "prune1.44_iter_800000.caffemodel"
 # caffemodel = caffe_root + '/4_model_checkpoint/1_before_retrain/L2/' + "alex_pruned_1.44_678half.caffemodel"
 # caffemodel = caffe_root + '/4_model_checkpoint/2_after_retrain/' + folder + "conv1.44_0.8_iter_675000.caffemodel"
-caffemodel = caffe_root + "/4_model_checkpoint/0_original_dense/L2/bvlc_alexnet.caffemodel"
+# caffemodel = caffe_root + "/4_model_checkpoint/0_original_dense/L2/bvlc_alexnet.caffemodel"
 # caffemodel = caffe_root + "/4_model_checkpoint/2_after_retrain/L1_3/prune1.59_iter_610000.caffemodel"
-caffemodel = caffe_root + '/4_model_checkpoint/2_after_retrain/' + folder + "conv1.44_0.8_iter_675000.caffemodel"
-caffemodel = caffe_root + '/4_model_checkpoint/1_before_retrain/' + folder + "alex_pruned_afterConv_2.1_678half.caffemodel"
+# caffemodel = caffe_root + '/4_model_checkpoint/2_after_retrain/' + folder + "conv1.44_0.8_iter_675000.caffemodel"
+# caffemodel = caffe_root + '/4_model_checkpoint/1_before_retrain/' + folder + "alex_pruned_afterConv_2.1_678half.caffemodel"
+caffemodel = './4_model_checkpoint/2_after_retrain/L2/prune9x_on8x_iter_190000.caffemodel'
+caffemodel = './4_model_checkpoint/2_after_retrain/L2/prune9x_on8x2_iter_425000.caffemodel'
 
-
-if folder[2] == '1':
-    layers = ['conv1', 'conv2', 'conv3', 'conv4', 'conv5', 'fc6_new', 'fc7_new', 'fc8_new']
-if folder[2] == '2':
-    layers = ['conv1', 'conv2', 'conv3', 'conv4', 'conv5', 'fc6', 'fc7', 'fc8']
 
 caffe.set_mode_gpu()
 caffe.set_device(0)
@@ -113,9 +112,8 @@ net = caffe.Net(prototxt, caffemodel, caffe.TEST)
 net.forward()
 layers = net.params.keys()
 blobs = net.blobs.keys()
-
 analyze_param(net, layers)
-# analyze_data(net, blobs)
+analyze_data(net, blobs)
 # hist_param_data(net)
 
 command = caffe_root + "/build/tools/caffe test --model=" + prototxt + " --weights=" + caffemodel + " --iterations=1000 --gpu 1"
