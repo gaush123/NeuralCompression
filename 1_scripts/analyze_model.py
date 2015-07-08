@@ -68,12 +68,21 @@ def analyze_param(net, layers):
 caffe.set_mode_gpu()
 caffe.set_device(2)
 
-folder = "/L2/"
+folder = "/lenet_300_100/"
+# folder = "/L2/"
 prototxt = caffe_root + '/3_prototxt_solver/' + folder + 'train_val.prototxt'
 # caffemodel = caffe_root + '/4_model_checkpoint/2_after_retrain/L2/' + "prune12x_iter_200000.caffemodel"
 # caffemodel = caffe_root + '/4_model_checkpoint/1_before_retrain/L2/' + "alex_pruned_1.44_678half.caffemodel"
 # caffemodel = caffe_root + '/4_model_checkpoint/1_before_retrain/L2/' + "alex_pruned_1.27_678half.caffemodel"
 # caffemodel = caffe_root + '/4_model_checkpoint/1_before_retrain/L2/' + "alex_pruned_1.58_678half.caffemodel"
+# caffemodel = './4_model_checkpoint/0_original_dense/lenet5/best_relu.caffemodel'
+# caffemodel = './4_model_checkpoint/2_after_retrain/lenet5/_iter_27500.caffemodel'
+# caffemodel = './4_model_checkpoint/2_after_retrain/lenet5/best/best_lenet5_10x_conv.caffemodel'
+# caffemodel = './4_model_checkpoint/2_after_retrain/lenet5/best/best_lenet5_16x_conv.caffemodel'
+# caffemodel = './4_model_checkpoint/2_after_retrain/lenet5/best/best_lenet5_12x_conv.caffemodel'
+# caffemodel = './4_model_checkpoint/2_after_retrain/L2/prune9x_on8x_iter_190000.caffemodel'
+caffemodel = './4_model_checkpoint/2_after_retrain/lenet_300_100/_iter_17500.caffemodel'
+# caffemodel = './4_model_checkpoint/0_original_dense/lenet_300_100/_iter_20000.caffemodel'
 # caffemodel = caffe_root + '/4_model_checkpoint/0_original_dense/L2/prune7x_iter_195000.caffemodel'
 caffemodel = './4_model_checkpoint/2_after_retrain/L2/prune10x_on8x_iter_205000.caffemodel'
 caffemodel = './4_model_checkpoint/1_before_retrain/L2/afterConv8x_1.9_fcAll.caffemodel'
@@ -84,12 +93,16 @@ if folder[2] == '1':
     layers = ['conv1', 'conv2', 'conv3', 'conv4', 'conv5', 'fc6_new', 'fc7_new', 'fc8_new']
 if folder[2] == '2':
     layers = ['conv1', 'conv2', 'conv3', 'conv4', 'conv5', 'fc6', 'fc7', 'fc8']
+if folder == "/lenet5/":
+    layers = ['conv1', 'conv2', 'ip1', 'ip2']
+if folder == "/lenet_300_100/":
+    layers = ['ip1', 'ip2', 'ip3']
 
 net = caffe.Net(prototxt, caffemodel, caffe.TEST)
 net.forward()
 analyze_param(net, layers)
 
-command = caffe_root + "/build/tools/caffe test --model=" + prototxt + " --weights=" + caffemodel + " --iterations=1000 --gpu 3"
+command = caffe_root + "/build/tools/caffe test --model=" + prototxt + " --weights=" + caffemodel + " --iterations=100 --gpu 0"
 print command
 os.system(command)
 

@@ -98,6 +98,11 @@ prototxt = caffe_root + '/5_bac/' + 'train_val1.44.prototxt'
 # caffemodel = caffe_root + '/4_model_checkpoint/2_after_retrain/L2/' + "prune1.44_iter_800000.caffemodel"
 # caffemodel = caffe_root + '/4_model_checkpoint/1_before_retrain/L2/' + "alex_pruned_1.44_678half.caffemodel"
 # caffemodel = caffe_root + '/4_model_checkpoint/2_after_retrain/' + folder + "conv1.44_0.8_iter_675000.caffemodel"
+# caffemodel = caffe_root + "/4_model_checkpoint/2_after_retrain/L1_3/prune1.59_iter_610000.caffemodel"
+caffemodel = caffe_root + "/4_model_checkpoint/0_original_dense/L2/bvlc_alexnet.caffemodel"
+caffemodel = caffe_root + '/4_model_checkpoint/2_after_retrain/' + folder + "conv1.44_0.8_iter_675000.caffemodel"
+caffemodel = caffe_root + '/4_model_checkpoint/1_before_retrain/' + folder + "alex_pruned_afterConv_2.1_678half.caffemodel"
+caffemodel = './4_model_checkpoint/2_after_retrain/L2/prune9x_on8x_iter_190000.caffemodel'
 # caffemodel = caffe_root + "/4_model_checkpoint/0_original_dense/L2/bvlc_alexnet.caffemodel"
 # caffemodel = caffe_root + "/4_model_checkpoint/2_after_retrain/L1_3/prune1.59_iter_610000.caffemodel"
 # caffemodel = caffe_root + '/4_model_checkpoint/2_after_retrain/' + folder + "conv1.44_0.8_iter_675000.caffemodel"
@@ -106,13 +111,19 @@ caffemodel = './4_model_checkpoint/2_after_retrain/L2/prune9x_on8x_iter_190000.c
 caffemodel = './4_model_checkpoint/2_after_retrain/L2/prune9x_on8x2_iter_425000.caffemodel'
 
 
+
 caffe.set_mode_gpu()
-caffe.set_device(0)
+# caffe.set_device()
 net = caffe.Net(prototxt, caffemodel, caffe.TEST)
 net.forward()
 layers = net.params.keys()
 blobs = net.blobs.keys()
+<<<<<<< HEAD
 analyze_param(net, layers)
+=======
+
+# analyze_param(net, layers)
+>>>>>>> ba932464a55029af347f9c245fa66d3b027587ed
 analyze_data(net, blobs)
 # hist_param_data(net)
 
