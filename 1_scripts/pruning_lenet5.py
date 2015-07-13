@@ -55,17 +55,16 @@ folder = "/lenet5/"
 
 prototxt = caffe_root + '/3_prototxt_solver/' + folder + 'train_val.prototxt'
 # caffemodel = caffe_root + '/4_model_checkpoint/0_original_dense/' + folder + 'lenet_iter_10000.caffemodel'
-caffemodel = caffe_root + '/4_model_checkpoint/0_original_dense/' + folder + 'lenet_relu_0.992.caffemodel'
+# caffemodel = caffe_root + '/4_model_checkpoint/0_original_dense/' + folder + 'lenet_relu_0.992.caffemodel'
+caffemodel = './4_model_checkpoint/0_original_dense/lenet5/best_relu.caffemodel'
 layers = ['conv1', 'conv2', 'ip1', 'ip2']
-layers_tbd = ['conv1', 'conv2', 'ip1', 'ip2']
+layers_tbd = ['ip1']
 
 suffix = 'relu_all'
 suffix_2 = 'lenet_'
 output_prefix = caffe_root + '/4_model_checkpoint/1_before_retrain/' + folder + suffix_2
-threshold_list = [  1.46, 1.49, 1.50, 1.51, 1.53, 1.55, 1.56, 1.61]
-
-
-# threshold_list = np.arange(2.00, 3.00, 0.01)
+# threshold_list = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6]
+threshold_list = np.arange(1.86, 2.50, 0.01)
 
 print "threshold list is", threshold_list
 fout = open(caffe_root + '/2_results/' + folder + 'parameter_cnt_' + suffix + '.csv', 'a')
@@ -95,14 +94,14 @@ def prune(threshold):
         # hi = np.max(np.abs(W.flatten()))
         hi = np.std(W.flatten())
         local_threshold = threshold
-        if layer == layers_tbd[0]:
-            local_threshold = 0.5  # 0.4
-        if layer == layers_tbd[1]:
-            local_threshold = threshold
-        if layer == layers_tbd[2]:
-            local_threshold = threshold  # -0.1
-        if layer == layers_tbd[3]:
-            local_threshold = threshold - 0.2  # -0.3
+#         if layer == layers_tbd[0]:
+#             local_threshold = 0.5  # 0.4
+#         if layer == layers_tbd[1]:
+#             local_threshold = threshold
+#         if layer == layers_tbd[2]:
+#             local_threshold = threshold  # -0.1
+#         if layer == layers_tbd[3]:
+#             local_threshold = threshold - 0.2  # -0.3
 
         mask = (np.abs(W) > (hi * local_threshold))
         mask = np.bool_(mask)

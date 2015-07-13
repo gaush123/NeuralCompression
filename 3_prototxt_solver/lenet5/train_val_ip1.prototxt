@@ -39,10 +39,10 @@ layer {
   bottom: "data"
   top: "conv1"
   param {
-    lr_mult: 1
+    lr_mult: 0
   }
   param {
-    lr_mult: 2
+    lr_mult: 0
   }
   convolution_param {
     num_output: 20
@@ -79,10 +79,10 @@ layer {
   bottom: "pool1"
   top: "conv2"
   param {
-    lr_mult: 1
+    lr_mult: 0
   }
   param {
-    lr_mult: 2
+    lr_mult: 0
   }
   convolution_param {
     num_output: 50
@@ -139,12 +139,12 @@ layer {
   name: "relu3"
   type: "ReLU"
   bottom: "ip1"
-  top: "ip1_relu"
+  top: "ip1"
 }
 layer {
   name: "ip2"
   type: "InnerProduct"
-  bottom: "ip1_relu"
+  bottom: "ip1"
   top: "ip2"
   param {
     lr_mult: 1

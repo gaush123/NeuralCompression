@@ -11,7 +11,7 @@ test_interval: 500
 #solver_type: NAG
 #solver_type: ADAGRAD
 # The base learning rate, momentum and the weight decay of the network.
-base_lr: 0.01
+base_lr: 0.05
 momentum: 0.9
 weight_decay: 0.00002
 # The learning rate policy
@@ -28,20 +28,24 @@ weight_decay: 0.00002
 
 lr_policy: "multistep"
 gamma: 0.8
-stepvalue: 8000
-# stepvalue: 12000
-stepvalue: 15000
-stepvalue: 16000
+# stepvalue: 8000
+# # stepvalue: 12000
+# stepvalue: 15000
+# stepvalue: 16000
+# stepvalue: 18000
+stepvalue: 5000
+stepvalue: 10000
 stepvalue: 18000
+stepvalue: 25000
 
 
 # Display every 100 iterations
 display: 100
 # The maximum number of iterations
-max_iter: 20000
+max_iter: 50000
 # snapshot intermediate results
-snapshot: 5000
-snapshot_prefix: "examples/mnist/lenet_300_100/lenet_300_100"
+snapshot: 500
+snapshot_prefix: "4_model_checkpoint/2_after_retrain/lenet_300_100/"
 # solver mode: CPU or GPU
 solver_mode: GPU
 solver_type: NESTEROV

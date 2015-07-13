@@ -54,7 +54,7 @@ if len(sys.argv) == 2:
 
 	y_loss = analyze_log(fileName4)
 	y_top1 = analyze_log(fileName5)
-	top1_ori, top5_ori = (0.9852 * 100, 0.9908 * 100)
+	top1_ori, top5_ori = (0.992 * 100, 0.992 * 100)
 
 	print "==============result============="
 	print "original accuracy  (%.2f%%, %.2f%%)" % (top1_ori, top5_ori)

@@ -1,5 +1,6 @@
 # The train/test net protocol buffer definition
 net: "3_prototxt_solver/lenet5/train_val.prototxt"
+# net: "3_prototxt_solver/lenet5/train_val_ip1.prototxt"
 # test_iter specifies how many forward passes the test should carry out.
 # In the case of MNIST, we have test batch size 100 and 100 test iterations,
 # covering the full 10,000 testing images.
@@ -26,7 +27,7 @@ display: 100
 max_iter: 30000
 # snapshot intermediate results
 snapshot: 500
-snapshot_prefix: "4_model_checkpoint/2_after_retrain/lenet5/tmp/"
+snapshot_prefix: "4_model_checkpoint/2_after_retrain/lenet5/"
 # solver mode: CPU or GPU
 solver_mode: GPU
 # solver_type: NESTEROV
