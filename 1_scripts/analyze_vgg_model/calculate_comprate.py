@@ -23,6 +23,8 @@ def analyze_comprate(net, layers, params_bits, location_bits = None, encoding='p
         assert len(location_bits) == len(layers)
         num_ori = 0
         num_new = 0
+        total_extra_slots = 0
+        total_non_zeros = 0
         # Parameters and locations bits
         for idx, layer in enumerate(layers):
             num_ori += net.params[layer][0].data.size * 32
@@ -31,8 +33,22 @@ def analyze_comprate(net, layers, params_bits, location_bits = None, encoding='p
             non_zeros_loc = np.where(net.params[layer][0].data.flatten() != 0.0)[0]
             distance_loc = non_zeros_loc[1:] - non_zeros_loc[:-1]
             extra_slots = np.sum(np.floor(distance_loc / max_length))
-            num_new += (np.count_nonzero(net.params[layer][0].data) + extra_slots) * (params_bits[idx] + location_bits[idx])
+            total_extra_slots += extra_slots
+            non_zeros = np.count_nonzero(net.params[layer][0].data)
+            total_non_zeros += non_zeros
+            num_new +=(non_zeros+ extra_slots) * (params_bits[idx] + location_bits[idx])
             num_new += net.params[layer][1].data.size * 32
+            print "Layer:", layer
+            print "Extra slots:",extra_slots
+            print "Non-zeros:", non_zeros
+            print "Extra slots rate", float(extra_slots) / non_zeros
+            print "====================================="
+
+
+        print "total extra slots"
+        print total_extra_slots
+        print "total non-zeros"
+        print total_non_zeros
 
         # Codebooks
         ndlist = np.array(bits_list)
