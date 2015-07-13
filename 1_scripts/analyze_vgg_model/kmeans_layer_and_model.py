@@ -6,6 +6,7 @@ Created on Apr 18, 2015
 
 from kmeans_by_layer import *
 
+caffe.set_device(0)
 def main2():
     bits_list = [2,3,4,6,8]
 

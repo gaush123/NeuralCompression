@@ -12,6 +12,8 @@ import scipy.cluster.vq as scv
 import pickle
 from kmeans import *
 
+caffe.set_device(0)
+log = log + '.layer'
 def eval_accu_layerwise(prototxt, caffemodel, bits_list, log):
     net = caffe.Net(prototxt, caffemodel, caffe.TEST)
     layers = filter(lambda x:'conv' in x or 'fc' in x or 'ip' in x, net.params.keys())
@@ -33,9 +35,9 @@ def eval_accu_layerwise(prototxt, caffemodel, bits_list, log):
 
             quantize_net(net, codebook)
 
-            net.save(caffemodel + '.quantize')
+            net.save(caffemodel + '.layer.quantize')
             log_new = log + "_layer%d"%i + "_%dbits"%bits
-            command = caffe_root + "/build/tools/caffe test --model=" + prototxt + " --weights=" + caffemodel + ".quantize --iterations=%d --gpu 2 2>"%iters +log_new
+            command = caffe_root + "/build/tools/caffe test --model=" + prototxt + " --weights=" + caffemodel + ".layer.quantize --iterations=%d --gpu 2 2>"%iters +log_new
             print command
             os.system(command)
             os.system('tail -n 3 '+ log_new)
@@ -44,7 +46,7 @@ def eval_accu_layerwise(prototxt, caffemodel, bits_list, log):
     return (accu_top1, accu_top5)
 
 def main1():
-    bits_list = [2,3,4,6,8]
+    bits_list = [2,3,4,8]
 
     accu_top1, accu_top5 = eval_accu_layerwise(prototxt, caffemodel, bits_list, log)
     np.save(dir_t + 'accu_top1', accu_top1)
