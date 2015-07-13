@@ -17,7 +17,7 @@ print caffe_root
 sys.path.insert(0, caffe_root + 'python')
 import caffe
 
-def analyze_comprate(net, layers, params_bits, location_bits = None, encoding='pack'):
+def analyze_comprate(net, layers, params_bits, location_bits=None, encoding='pack'):
     assert len(layers) == len(params_bits)
     if encoding == 'pack':
         assert len(location_bits) == len(layers)
@@ -36,10 +36,10 @@ def analyze_comprate(net, layers, params_bits, location_bits = None, encoding='p
             total_extra_slots += extra_slots
             non_zeros = np.count_nonzero(net.params[layer][0].data)
             total_non_zeros += non_zeros
-            num_new +=(non_zeros+ extra_slots) * (params_bits[idx] + location_bits[idx])
+            num_new += (non_zeros + extra_slots) * (params_bits[idx] + location_bits[idx])
             num_new += net.params[layer][1].data.size * 32
             print "Layer:", layer
-            print "Extra slots:",extra_slots
+            print "Extra slots:", extra_slots
             print "Non-zeros:", non_zeros
             print "Extra slots rate", float(extra_slots) / non_zeros
             print "====================================="
@@ -60,8 +60,8 @@ def analyze_comprate(net, layers, params_bits, location_bits = None, encoding='p
 
 caffe.set_mode_gpu()
 caffe.set_device(0)
-prototxt = '3_prototxt_solver/L2/train_val.prototxt'             
-caffemodel = '4_model_checkpoint/alexnet/alexnet9x.caffemodel'  
+prototxt = '3_prototxt_solver/L2/train_val.prototxt'
+caffemodel = '4_model_checkpoint/alexnet/alexnet9x.caffemodel'
 
 net = caffe.Net(prototxt, caffemodel, caffe.TEST)
 

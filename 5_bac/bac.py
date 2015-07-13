@@ -18,8 +18,8 @@ sys.path.insert(0, caffe_root + 'python')
 import caffe
 
 def hist_param_data(net):
-    layers = ["fc6", "fc7", "fc8"]
-    layers = ["conv1"]
+#    layers = ["fc6", "fc7", "fc8"]
+#   layers = ["conv1"]
     for i, layer in enumerate(layers):
         numBins = 2 ^ 8
         W = net.params[layer][0].data
@@ -94,7 +94,9 @@ def analyze_data(net, layers):
 
 
 folder = "/L2/"
+folder = "/vgg16/"
 prototxt = caffe_root + '/5_bac/' + 'train_val1.44.prototxt'
+prototxt = caffe_root + '/3_prototxt_solver/'+folder + 'train_val_individual.prototxt'
 # caffemodel = caffe_root + '/4_model_checkpoint/2_after_retrain/L2/' + "prune1.44_iter_800000.caffemodel"
 # caffemodel = caffe_root + '/4_model_checkpoint/1_before_retrain/L2/' + "alex_pruned_1.44_678half.caffemodel"
 # caffemodel = caffe_root + '/4_model_checkpoint/2_after_retrain/' + folder + "conv1.44_0.8_iter_675000.caffemodel"
@@ -109,6 +111,7 @@ caffemodel = './4_model_checkpoint/2_after_retrain/L2/prune9x_on8x_iter_190000.c
 # caffemodel = caffe_root + '/4_model_checkpoint/1_before_retrain/' + folder + "alex_pruned_afterConv_2.1_678half.caffemodel"
 caffemodel = './4_model_checkpoint/2_after_retrain/L2/prune9x_on8x_iter_190000.caffemodel'
 caffemodel = './4_model_checkpoint/2_after_retrain/L2/prune9x_on8x2_iter_425000.caffemodel'
+caffemodel = './4_model_checkpoint/2_after_retrain/vgg16/conv0_0.9_conv1_1.1_iter_27000.caffemodel'
 
 
 
@@ -118,12 +121,7 @@ net = caffe.Net(prototxt, caffemodel, caffe.TEST)
 net.forward()
 layers = net.params.keys()
 blobs = net.blobs.keys()
-<<<<<<< HEAD
 analyze_param(net, layers)
-=======
-
-# analyze_param(net, layers)
->>>>>>> ba932464a55029af347f9c245fa66d3b027587ed
 analyze_data(net, blobs)
 # hist_param_data(net)
 
