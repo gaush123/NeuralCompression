@@ -67,7 +67,7 @@ def kmeans_net(net, layers, num_c = 16, initials=None):
         print "codebook size:", len(codebook[layer])
     return codebook
 
-def quantize_net(net, codebook):
+def quantize_update_net(net, codebook):
     layers = codebook.keys()
     print "================Perform quantization=============="
     for layer in layers:
@@ -75,7 +75,10 @@ def quantize_net(net, codebook):
         W = net.params[layer][0].data
         codes, dist = scv.vq(W.flatten(), codebook[layer])
         W_q = np.reshape(codebook[layer][codes], W.shape)
+        mask_codebook = np.reshape(codes, W.shape)
         np.copyto(net.params[layer][0].data, W_q)
+        np.copyto(net.params[layer][0].mask_codebook, mask_codebook)
+        net.params[layer][0].codebook[:len(codebook[layer])] = codebook[layer]
 
 def parse_caffe_log(log):
     lines = open(log).readlines()
@@ -87,31 +90,13 @@ def main(choice = [64,16] ):
 # layers = filter(lambda x:'conv' in x or 'fc' in x or 'ip' in x, net.params.keys())
     layers = filter(lambda x:'conv' in x or 'fc' in x or 'ip' in x, net.params.keys())
 
-# Evaluate the origina accuracy
-    command = caffe_root + "/build/tools/caffe test --model=" + prototxt + " --weights=" + caffemodel + " --iterations=%d --gpu 2 2>"%iters +log
-    print command
-    # os.system(command)
-    os.system('tail -n 3 '+ log)
-
     num_c = [choice[0]]  * (len(layers)-3) + [choice[1]] * 3
     codebook = kmeans_net(net, layers, num_c)
 
-    pickle.dump(codebook, open(dir_t + 'codebook.pkl', 'w'))
 
-    quantize_net(net, codebook)
+    quantize_update_net(net, codebook)
 
-# Evaluate the new model's accuracy
-    net.save(caffemodel + '.quantize')
-    command = caffe_root + "/build/tools/caffe test --model=" + prototxt + " --weights=" + caffemodel + ".quantize --iterations=%d --gpu 2 2>"%iters +log + "new"
-    print command
-    # os.system(command)
-    os.system('tail -n 3 '+ log + 'new')
+    net.save(caffemodel + '.update')
 
 if __name__ == "__main__":
-    '''
-    main([256,8])
-    main([256,16])
-    main([64,8])
-    main([64,16])
-    '''
     main([256,16])

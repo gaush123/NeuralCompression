@@ -56,7 +56,7 @@ def eval_initials(prototxt, caffemodel, bits_list, log, layer):
 
 def main2():
     bits_list = [2,3,4,6,8]
-    layer = 'fc7'
+    layer = 'conv2'
     caffemodel = '4_model_checkpoint/alexnet/alexnet9x.caffemodel'
     accu_top1, accu_top5 = eval_initials(prototxt, caffemodel, bits_list, log, layer)
 
