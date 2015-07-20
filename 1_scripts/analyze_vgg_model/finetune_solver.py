@@ -94,11 +94,13 @@ for layer in layers:
         codeDict[layer].setdefault(a[i], []).append(b[i])
 
 print "================3 Perform fintuning=============="
-extra_lr=1e-3
+extra_lr=1e-5
 import time
 decay_rate = 0.99 
 momentum=0.9
-update='rmsprop'
+update=train_opt
+if update=='':
+    update = 'sgd'
 start_time=time.time()
 step_cache = {}
 for layer in layers:
@@ -116,17 +118,17 @@ for i in xrange(3000):
         for code in xrange(1,codeBookSize):
             indexes = codeDict[layer][code]
             diff_ave=np.sum(diff[indexes])/len(indexes)
-            if update == 'momentum':
+            if update == 'sgd':
+                dx = -extra_lr * diff_ave
+            elif update == 'momentum':
                 dx = momentum * step_cache[layer][code] - extra_lr * diff_ave
                 step_cache[layer][code] = dx                
             elif update == 'rmsprop':
                 step_cache[layer][code] =  decay_rate * step_cache[layer][code] + (1.0 - decay_rate) * diff_ave ** 2
-                dx = -(extra_lr* diff_ave) / np.sqrt(step_cache[layer][code] + 1e-8)
+                dx = -(extra_lr* diff_ave) / np.sqrt(step_cache[layer][code] + 1e-4)
 
-            codebook[layer][code] -= extra_lr*np.sum(diff[indexes])/len(indexes)
+            codebook[layer][code] += dx
         W2 = codebook[layer][maskCode[layer]]
         
         net.params[layer][0].data[...]=W2
     # print np.std(net.params[layer][0].diff)
- 
-

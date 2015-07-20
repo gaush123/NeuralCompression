@@ -78,7 +78,7 @@ caffemodel = '4_model_checkpoint/alexnet/alexnet9x.caffemodel'
 
 net = caffe.Net(prototxt, caffemodel, caffe.TEST)
 
-def main(choice = [6,4,5], fout = None):
+def main(choice = [4,3,5], fout = None):
     layers = filter(lambda x:'conv' in x or 'fc' in x or 'ip' in x, net.params.keys())
     bits_list = [choice[0]] * (len(layers) - 3) + [choice[1]] * 3
     location_bits = [choice[2]] * len(layers)
