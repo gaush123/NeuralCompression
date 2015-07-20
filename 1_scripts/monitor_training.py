@@ -27,7 +27,7 @@ def analyze_log_ave(fileName):
 	return y
 
 folder = "tmp/"
-fileName = "/home/maohz12/pruning/1_scripts/analyze_vgg_model/finetune_log/8_3_rmsprop.log"
+fileName = sys.argv[1]
 
 os.system('mkdir ' + caffe_root + "/2_results/" + folder)
 os.system(caffe_root + '/1_scripts/extract_trace.sh ' + fileName + ' ' + folder)

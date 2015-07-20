@@ -1,3 +1,3 @@
 
-python finetune_solver.py 2 8 3 rmsprop \
-2>finetune_log/8_3_rmsprop.log
+python finetune_solver.py 2 6 4 momentum \
+2>finetune_log/6_4_momentum_2e-3.log

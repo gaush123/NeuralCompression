@@ -66,14 +66,43 @@ def kmeans_net(net, layers, num_c = 16, initials=None):
         codebook[layer] = np.append(0.0, codebook[layer])
         print "codebook size:", len(codebook[layer])
     return codebook
+def stochasitc_quantize2(W, codebook):
+    
+    mask = W[:,np.newaxis] - codebook
+    
+    mask_neg = mask
+    mask_neg[mask_neg>0.0] -= 99999.0
+    max_neg = np.max(mask_neg, axis=1)
+    max_code = np.argmax(mask_neg, axis = 1)
+    
+    mask_pos = mask
+    mask_pos += 99999.0
+    min_code = np.argmin(mask_pos, axis = 1)
+    min_pos = np.min(mask_pos, axis=1)
+    
+ 
+    rd = np.random.uniform(low=0.0, high=1.0, size=(len(W)))
+    thresh = min_pos.astype(np.float32)/(min_pos - max_neg)
+    
+    max_idx = thresh < rd
+    min_idx = thresh >= rd
 
-def quantize_net(net, codebook):
+    codes = np.zeros(W.shape)
+    codes[max_idx] += min_code[max_idx]
+    codes[min_idx] += max_code[min_idx]
+    
+    return codes
+
+def quantize_net(net, codebook, use_stochastic=False):
     layers = codebook.keys()
     print "================Perform quantization=============="
     for layer in layers:
         print "Quantize layer:", layer
         W = net.params[layer][0].data
-        codes, dist = scv.vq(W.flatten(), codebook[layer])
+        if use_stochastic:
+            codes = stochasitc_quantize2(W.flatten(), codebook[layer]) 
+        else:
+            codes, _ = scv.vq(W.flatten(), codebook[layer])
         W_q = np.reshape(codebook[layer][codes], W.shape)
         np.copyto(net.params[layer][0].data, W_q)
 
@@ -98,6 +127,33 @@ def main(choice = [64,16] ):
 
     pickle.dump(codebook, open(dir_t + 'codebook.pkl', 'w'))
 
+    quantize_net(net, codebook, True)
+
+# Evaluate the new model's accuracy
+    net.save(caffemodel + '.quantize')
+    command = caffe_root + "/build/tools/caffe test --model=" + prototxt + " --weights=" + caffemodel + ".quantize --iterations=%d --gpu 2 2>"%iters +log + "new"
+    print command
+    # os.system(command)
+    os.system('tail -n 3 '+ log + 'new')
+
+
+def main2():
+    net = caffe.Net(prototxt, caffemodel, caffe.TEST)
+# layers = filter(lambda x:'conv' in x or 'fc' in x or 'ip' in x, net.params.keys())
+    layers = filter(lambda x:'conv' in x or 'fc' in x or 'ip' in x, net.params.keys())
+
+# Evaluate the origina accuracy
+    command = caffe_root + "/build/tools/caffe test --model=" + prototxt + " --weights=" + caffemodel + " --iterations=%d --gpu 2 2>"%iters +log
+    print command
+    # os.system(command)
+    os.system('tail -n 3 '+ log)
+
+    bits = [8,8,7,6,6,3,3,4]
+    num_c = 2 ** bits 
+    codebook = kmeans_net(net, layers, num_c)
+
+    pickle.dump(codebook, open(dir_t + 'codebook.pkl', 'w'))
+
     quantize_net(net, codebook)
 
 # Evaluate the new model's accuracy
@@ -113,5 +169,7 @@ if __name__ == "__main__":
     main([256,16])
     main([64,8])
     main([64,16])
-    '''
     main([256,16])
+    main2()
+    '''
+    main([64,16])

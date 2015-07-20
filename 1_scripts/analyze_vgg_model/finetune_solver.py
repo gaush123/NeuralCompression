@@ -94,7 +94,7 @@ for layer in layers:
         codeDict[layer].setdefault(a[i], []).append(b[i])
 
 print "================3 Perform fintuning=============="
-extra_lr=1e-5
+extra_lr=5e-6
 import time
 decay_rate = 0.99 
 momentum=0.9
@@ -121,11 +121,11 @@ for i in xrange(3000):
             if update == 'sgd':
                 dx = -extra_lr * diff_ave
             elif update == 'momentum':
-                dx = momentum * step_cache[layer][code] - extra_lr * diff_ave
+                dx = momentum * step_cache[layer][code] - (1-momentum) * extra_lr * diff_ave
                 step_cache[layer][code] = dx                
             elif update == 'rmsprop':
                 step_cache[layer][code] =  decay_rate * step_cache[layer][code] + (1.0 - decay_rate) * diff_ave ** 2
-                dx = -(extra_lr* diff_ave) / np.sqrt(step_cache[layer][code] + 1e-4)
+                dx = -(extra_lr* diff_ave) / np.sqrt(step_cache[layer][code] + 1e-6)
 
             codebook[layer][code] += dx
         W2 = codebook[layer][maskCode[layer]]
