@@ -19,11 +19,13 @@ import caffe
 
 caffe.set_mode_gpu()
 caffe.set_device(0)
-prototxt = '/home/maohz12/pruning/3_prototxt_solver/vgg16/VGG_ILSVRC_16_layers_deploy.prototxt'
-caffemodel = '/home/maohz12/pruning/4_model_checkpoint/vgg16/vgg16_12x.caffemodel'
-xls_file = '2_results/VGG16/res.xls'
+prototxt = '3_prototxt_solver/L2/train_val.prototxt'          
+solver = '3_prototxt_solver/L2/finetune_solver.prototxt'      
+caffemodel = '4_model_checkpoint/alexnet/alexnet9x.caffemodel'
 
-net = caffe.Classifier(prototxt, caffemodel, caffe.TEST)
+solver = caffe.SGDSolver(solver) 
+solver.net.copy_from(caffemodel) 
+net = solver.net                 
 
 '''
 layers = filter(lambda x:'conv' in x or 'fc' in x, net.params.keys())
