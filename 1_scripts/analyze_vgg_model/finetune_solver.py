@@ -94,13 +94,24 @@ for layer in layers:
         codeDict[layer].setdefault(a[i], []).append(b[i])
 
 print "================3 Perform fintuning=============="
-extra_lr=5e-6
+extra_lr=5e-4
 import time
 decay_rate = 0.99 
-momentum=0.9
+momentum=0.5
 update=train_opt
 if update=='':
     update = 'sgd'
+if update=='adadelta':
+    step_cache2 = {}
+    for layer in layers:
+        step_cache2[layer] = {}
+        for code in xrange(1, len(codebook[layer])):
+            step_cache2[layer][code] = 0.0
+    smooth_eps = 1e-8
+if update == 'rmsprop':
+    extra_lr /= 100
+
+
 start_time=time.time()
 step_cache = {}
 for layer in layers:
@@ -126,6 +137,10 @@ for i in xrange(3000):
             elif update == 'rmsprop':
                 step_cache[layer][code] =  decay_rate * step_cache[layer][code] + (1.0 - decay_rate) * diff_ave ** 2
                 dx = -(extra_lr* diff_ave) / np.sqrt(step_cache[layer][code] + 1e-6)
+            elif update == 'adadelta':                                                                              
+                step_cache[layer][code] = step_cache[layer][code] * decay_rate + (1.0 - decay_rate) * diff_ave ** 2           
+                dx = - np.sqrt( (step_cache2[layer][code] + smooth_eps) / (step_cache[layer][code] + smooth_eps) ) * diff_ave
+                step_cache2[layer][code] = step_cache2[layer][code] * decay_rate + (1.0 - decay_rate) * (dx ** 2)             
 
             codebook[layer][code] += dx
         W2 = codebook[layer][maskCode[layer]]

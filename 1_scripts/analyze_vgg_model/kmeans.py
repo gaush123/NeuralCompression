@@ -79,7 +79,6 @@ def stochasitc_quantize2(W, codebook):
     mask_pos += 99999.0
     min_code = np.argmin(mask_pos, axis = 1)
     min_pos = np.min(mask_pos, axis=1)
-    
  
     rd = np.random.uniform(low=0.0, high=1.0, size=(len(W)))
     thresh = min_pos.astype(np.float32)/(min_pos - max_neg)
@@ -91,7 +90,7 @@ def stochasitc_quantize2(W, codebook):
     codes[max_idx] += min_code[max_idx]
     codes[min_idx] += max_code[min_idx]
     
-    return codes
+    return codes.astype(np.int)
 
 def quantize_net(net, codebook, use_stochastic=False):
     layers = codebook.keys()
@@ -133,7 +132,7 @@ def main(choice = [64,16] ):
     net.save(caffemodel + '.quantize')
     command = caffe_root + "/build/tools/caffe test --model=" + prototxt + " --weights=" + caffemodel + ".quantize --iterations=%d --gpu 2 2>"%iters +log + "new"
     print command
-    # os.system(command)
+    os.system(command)
     os.system('tail -n 3 '+ log + 'new')
 
 
@@ -160,7 +159,7 @@ def main2():
     net.save(caffemodel + '.quantize')
     command = caffe_root + "/build/tools/caffe test --model=" + prototxt + " --weights=" + caffemodel + ".quantize --iterations=%d --gpu 2 2>"%iters +log + "new"
     print command
-    # os.system(command)
+    os.system(command)
     os.system('tail -n 3 '+ log + 'new')
 
 if __name__ == "__main__":
