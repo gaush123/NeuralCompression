@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import scipy.cluster.vq as scv
 import pickle
 import argparse
+import time
 
 parser = argparse.ArgumentParser()
 #===========Basic options=============
@@ -12,6 +13,7 @@ parser.add_argument('--device-id', '-d', dest='device_id', type=int, default=0)
 parser.add_argument('bits', type=int, nargs='+')
 parser.add_argument('--layers', dest='layers', type=str, default='all')
 parser.add_argument('--network', dest='network', type=str, default='alexnet')
+parser.add_argument('--timing', dest='timing', type=bool, default=False)
 
 #=======Training options===============
 parser.add_argument('--lr', dest='lr', type=float, default=50)
@@ -24,15 +26,17 @@ parser.add_argument('--finetune-codebook-iters', dest='co_iters', type=int, defa
 parser.add_argument('--accumulate-diff-iters', dest='ac_iters', type=int, default=10)  
 parser.add_argument('--stochastic', dest='use_stochastic', type=bool, default=True)  
 
-
 args = parser.parse_args()
 
+#=================Initializa Caffe==============
 caffe_root = os.environ["CAFFE_ROOT"]
 os.chdir(caffe_root)
 sys.path.insert(0, caffe_root + 'python')
 import caffe
+caffe.set_mode_gpu()        
+caffe.set_device(args.device_id) 
 
-
+#==============Set paths========================
 option = args.network
 if option == 'lenet5':
     prototxt = '3_prototxt_solver/lenet5/train_val.prototxt'             
@@ -53,9 +57,9 @@ elif option == 'vgg':
     caffemodel = '4_model_checkpoint/vgg16/vgg16_12x.caffemodel'  
     iters = 1000
     dir_t = '2_results/kmeans/vgg16/'
-
 log = dir_t + 'log_accu'
 
+#==================Initializa solver and net==========
 solver = caffe.SGDSolver(solver_proto)
 solver.net.copy_from(caffemodel)
 net = solver.net
@@ -74,8 +78,8 @@ elif len(args.bits) == 2:
 else:
     num_c = args.bits
     assert len(num_c) == len(total_layers)
-
 num_c = map(lambda x: 2 ** x, num_c)
+
 
 def kmeans_net(net, layers, num_c = 16, initials=None):                 
     codebook = {}                                                       
@@ -124,7 +128,8 @@ def stochasitc_quantize2(W, codebook):
     
     return codes.astype(np.int)
 
-def quantize_net_with_dict(net, layers, codebook, use_stochastic=False):
+def quantize_net_with_dict(net, layers, codebook, use_stochastic=False, timing=False):
+    start_time = time.time()
     codeDict={}
     maskCode={}
     for layer in layers:
@@ -146,6 +151,9 @@ def quantize_net_with_dict(net, layers, codebook, use_stochastic=False):
         for i in xrange(len(a)):
             codeDict[layer].setdefault(a[i], []).append(b[i])
 
+    if args.timing:
+        print "Update codebook time:%f"%(time.time() - start_time)
+
     return codeDict, maskCode
 
 def static_vars(**kwargs):
@@ -158,6 +166,7 @@ def static_vars(**kwargs):
 @static_vars(step_cache={}, step_cache2={}, initial=False)
 def update_codebook_net(net, codebook, codeDict, maskCode, args, update_layers=None):
 
+    start_time = time.time()
     extra_lr=args.lr
     decay_rate = args.decay_rate 
     momentum= args.momentum
@@ -218,4 +227,7 @@ def update_codebook_net(net, codebook, codeDict, maskCode, args, update_layers=N
         # Maintain the not-updated layers and update the to-update layers
         W2 = codebook[layer][maskCode[layer]]
         net.params[layer][0].data[...]=W2
+
+    if args.timing:
+        print "Update codebook time:%f"%(time.time() - start_time)
 
