@@ -8,7 +8,7 @@ import sys
 import os
 import numpy as np
 import matplotlib.pyplot as plt
-import scipy.cluster.vq as scv
+import scipy.cluster.vq_maohz as scv
 import pickle
 
 # os.system("cd $CAFFE_ROOT")
@@ -54,7 +54,7 @@ def kmeans_net(net, layers, num_c = 16, initials=None):
         if initials is None: #Default: uniform sample
             std = np.std(W)
             initial_uni = np.linspace(-4 * std, 4 * std, num_c[idx] - 1)
-            codebook[layer],_= scv.kmeans(W, initial_uni)
+            codebook[layer],_= scv.kmeans(W, initial_uni, compress=False)
             '''
             codebook[layer],_= scv.kmeans(W, num_c[idx] - 1)
             '''
@@ -117,21 +117,20 @@ def main(choice = [64,16] ):
 
 # Evaluate the origina accuracy
     command = caffe_root + "/build/tools/caffe test --model=" + prototxt + " --weights=" + caffemodel + " --iterations=%d --gpu 2 2>"%iters +log
-    print command
+    #print command
     # os.system(command)
-    os.system('tail -n 3 '+ log)
+    #os.system('tail -n 3 '+ log)
 
     num_c = [choice[0]]  * (len(layers)-3) + [choice[1]] * 3
     codebook = kmeans_net(net, layers, num_c)
 
-    pickle.dump(codebook, open(dir_t + 'codebook.pkl', 'w'))
-
-    quantize_net(net, codebook, True)
+    quantize_net(net, codebook)
 
 # Evaluate the new model's accuracy
     net.save(caffemodel + '.quantize')
     command = caffe_root + "/build/tools/caffe test --model=" + prototxt + " --weights=" + caffemodel + ".quantize --iterations=%d --gpu 2 2>"%iters +log + "new"
-    print command
+    #print command
+    print choice
     os.system(command)
     os.system('tail -n 3 '+ log + 'new')
 
@@ -172,3 +171,4 @@ if __name__ == "__main__":
     main2()
     '''
     main([64,16])
+    main([64,32])

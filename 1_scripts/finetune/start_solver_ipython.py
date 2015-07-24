@@ -18,7 +18,7 @@ sys.path.insert(0, caffe_root + 'python')
 import caffe
 
 caffe.set_mode_gpu()
-caffe.set_device(0)
+caffe.set_device(3)
 prototxt = '3_prototxt_solver/L2/train_val.prototxt'          
 solver = '3_prototxt_solver/L2/finetune_solver.prototxt'      
 caffemodel = '4_model_checkpoint/alexnet/alexnet9x.caffemodel'

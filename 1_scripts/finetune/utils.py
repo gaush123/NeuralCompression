@@ -2,7 +2,7 @@ import sys
 import os
 import numpy as np
 import matplotlib.pyplot as plt
-import scipy.cluster.vq as scv
+import scipy.cluster.vq_maohz as scv
 import pickle
 import argparse
 import time
@@ -13,7 +13,10 @@ parser.add_argument('--device-id', '-d', dest='device_id', type=int, default=0)
 parser.add_argument('bits', type=int, nargs='+')
 parser.add_argument('--layers', dest='layers', type=str, default='all')
 parser.add_argument('--network', dest='network', type=str, default='alexnet')
-parser.add_argument('--timing', dest='timing', type=bool, default=False)
+parser.add_argument('--timing', dest='timing', action='store_true')
+
+parser.add_argument('--kmeans-method', dest='kmeans_method', type=str, default='linear')
+parser.add_argument('--no-kmeans-compress', dest='kmeans_compress', action='store_false')
 
 #=======Training options===============
 parser.add_argument('--lr', dest='lr', type=float, default=50)
@@ -21,10 +24,15 @@ parser.add_argument('--decay-rate', dest='decay_rate', type=float, default=0.99)
 parser.add_argument('--momentum', dest='momentum', type=float, default=0.0)  
 parser.add_argument('--update', dest='update', type=str, default='sgd')  
 
+parser.add_argument('--normalize-codebook-diff', dest='normalize_flag', action='store_true')
+parser.add_argument('--no-average-diff', dest='average_flag', action='store_false')
+
 #===========For iterative training==============
 parser.add_argument('--finetune-codebook-iters', dest='co_iters', type=int, default=1)  
 parser.add_argument('--accumulate-diff-iters', dest='ac_iters', type=int, default=10)  
-parser.add_argument('--stochastic', dest='use_stochastic', type=bool, default=True)  
+parser.add_argument('--stochastic', dest='use_stochastic', action='store_true')  
+
+parser.set_defaults(timing=False, kmeans_compress=True, normalize_flag=False, average_flag=True, use_stochastic=False)
 
 args = parser.parse_args()
 
@@ -60,7 +68,7 @@ elif option == 'vgg':
 log = dir_t + 'log_accu'
 
 #==================Initializa solver and net==========
-solver = caffe.SGDSolver(solver_proto)
+solver = caffe.NesterovSolver(solver_proto)
 solver.net.copy_from(caffemodel)
 net = solver.net
 
@@ -81,7 +89,7 @@ else:
 num_c = map(lambda x: 2 ** x, num_c)
 
 
-def kmeans_net(net, layers, num_c = 16, initials=None):                 
+def kmeans_net(net, layers, num_c = 16, initials=None, method='linear',compress=True):                 
     codebook = {}                                                       
     if type(num_c) == type(1):                                          
         num_c = [num_c] * len(layers)                                   
@@ -94,9 +102,15 @@ def kmeans_net(net, layers, num_c = 16, initials=None):
         W = net.params[layer][0].data.flatten()                         
         W = W[np.where(W != 0)]                                         
         if initials is None: #Default: uniform sample                   
-            std = np.std(W)                                             
-            initial_uni = np.linspace(-4 * std, 4 * std, num_c[idx] - 1)
-            codebook[layer],_= scv.kmeans(W, initial_uni)               
+            if method=='linear':
+                std = np.std(W)                                             
+                initial_uni = np.linspace(-4 * std, 4 * std, num_c[idx] - 1)
+                codebook[layer],_= scv.kmeans(W, initial_uni, compress=compress)               
+            elif method == 'random':
+                codebook[layer],_= scv.kmeans(W, num_c[idx]-1, compress=compress)               
+            else:
+                raise Exception
+                
         else:
             codebook[layer],_= scv.kmeans(W, initials)                  
         codebook[layer] = np.append(0.0, codebook[layer])               
@@ -164,13 +178,16 @@ def static_vars(**kwargs):
     return decorate
 
 @static_vars(step_cache={}, step_cache2={}, initial=False)
-def update_codebook_net(net, codebook, codeDict, maskCode, args, update_layers=None):
+def update_codebook_net(net, codebook, codeDict, maskCode, args, update_layers=None, snapshot=None):
 
     start_time = time.time()
     extra_lr=args.lr
     decay_rate = args.decay_rate 
     momentum= args.momentum
     update_method= args.update
+
+    normalize_flag = args.normalize_flag
+
 
     if update_method == 'rmsprop':
         extra_lr /= 100
@@ -191,6 +208,7 @@ def update_codebook_net(net, codebook, codeDict, maskCode, args, update_layers=N
                 step_cache[layer][code] = 0.0
         
         update_codebook_net.initial = True
+
     else:
         step_cache2 = update_codebook_net.step_cache2
         step_cache = update_codebook_net.step_cache
@@ -204,23 +222,31 @@ def update_codebook_net(net, codebook, codeDict, maskCode, args, update_layers=N
         if layer in update_layers:
             diff=net.params[layer][0].diff.flatten()
             codeBookSize=len(codebook[layer])
+            dx = np.zeros((codeBookSize))
             for code in xrange(1,codeBookSize):
                 indexes = codeDict[layer][code]
-                diff_ave=np.sum(diff[indexes])/len(indexes)
+                if args.average_flag:
+                    diff_ave=np.sum(diff[indexes])/len(indexes)
+                else:
+                    diff_ave = np.sum(diff[indexes])
+
                 if update_method == 'sgd':
-                    dx = -extra_lr * diff_ave
+                    dx[code] = -extra_lr * diff_ave
                 elif update_method == 'momentum':
-                    dx = momentum * step_cache[layer][code] - (1-momentum) * extra_lr * diff_ave
+                    dx[code] = momentum * step_cache[layer][code] - (1-momentum) * extra_lr * diff_ave
                     step_cache[layer][code] = dx                
                 elif update_method == 'rmsprop':
                     step_cache[layer][code] =  decay_rate * step_cache[layer][code] + (1.0 - decay_rate) * diff_ave ** 2
-                    dx = -(extra_lr* diff_ave) / np.sqrt(step_cache[layer][code] + 1e-6)
+                    dx[code] = -(extra_lr* diff_ave) / np.sqrt(step_cache[layer][code] + 1e-6)
                 elif update_method == 'adadelta':                                                                              
                     step_cache[layer][code] = step_cache[layer][code] * decay_rate + (1.0 - decay_rate) * diff_ave ** 2           
-                    dx = - np.sqrt( (step_cache2[layer][code] + smooth_eps) / (step_cache[layer][code] + smooth_eps) ) * diff_ave
+                    dx[code] = - np.sqrt( (step_cache2[layer][code] + smooth_eps) / (step_cache[layer][code] + smooth_eps) ) * diff_ave
                     step_cache2[layer][code] = step_cache2[layer][code] * decay_rate + (1.0 - decay_rate) * (dx ** 2)             
 
-                codebook[layer][code] += dx
+            if normalize_flag:
+                codebook[layer] += extra_lr * np.sqrt(np.mean(codebook[layer] ** 2)) / np.sqrt(np.mean(dx ** 2)) * dx
+            else:
+                codebook[layer] += dx
         else:
             pass
 
@@ -230,4 +256,7 @@ def update_codebook_net(net, codebook, codeDict, maskCode, args, update_layers=N
 
     if args.timing:
         print "Update codebook time:%f"%(time.time() - start_time)
+
+    if snapshot is not None:
+        pickle.dump(codebook, open(snapshot, 'w'))
 

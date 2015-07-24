@@ -1,7 +1,7 @@
 from utils import *
 
 
-codebook = kmeans_net(net, total_layers, num_c)
+codebook = kmeans_net(net, total_layers, num_c, method=args.kmeans_method, compress=args.kmeans_compress)
 
 codeDict, maskCode = quantize_net_with_dict(net, total_layers, codebook)
 
