@@ -21,19 +21,19 @@ parser.add_argument('--no-kmeans-compress', dest='kmeans_compress', action='stor
 #=======Training options===============
 parser.add_argument('--lr', dest='lr', type=float, default=50)
 parser.add_argument('--decay-rate', dest='decay_rate', type=float, default=0.99)
-parser.add_argument('--momentum', dest='momentum', type=float, default=0.0)  
-parser.add_argument('--update', dest='update', type=str, default='sgd')  
+parser.add_argument('--momentum', dest='momentum', type=float, default=0.0)
+parser.add_argument('--update', dest='update', type=str, default='sgd')
 
 parser.add_argument('--normalize-codebook-diff', dest='normalize_flag', action='store_true')
 parser.add_argument('--no-average-diff', dest='average_flag', action='store_false')
 
 #===========For iterative training==============
-parser.add_argument('--finetune-codebook-iters', dest='co_iters', type=int, default=1)  
-parser.add_argument('--accumulate-diff-iters', dest='ac_iters', type=int, default=10)  
-parser.add_argument('--stochastic', dest='use_stochastic', action='store_true')  
+parser.add_argument('--finetune-codebook-iters', dest='co_iters', type=int, default=1)
+parser.add_argument('--accumulate-diff-iters', dest='ac_iters', type=int, default=10)
+parser.add_argument('--stochastic', dest='use_stochastic', action='store_true')
 
 #=============For Snapshot=====================
-parser.add_argument('--snapshot', dest='snapshot', type=str, default='None')  
+parser.add_argument('--snapshot', dest='snapshot', type=str, default='None')
 
 parser.set_defaults(timing=False, kmeans_compress=True, normalize_flag=False, average_flag=True, use_stochastic=False)
 
@@ -44,28 +44,28 @@ caffe_root = os.environ["CAFFE_ROOT"]
 os.chdir(caffe_root)
 sys.path.insert(0, caffe_root + 'python')
 import caffe
-caffe.set_mode_gpu()        
-caffe.set_device(args.device_id) 
+caffe.set_mode_gpu()
+caffe.set_device(args.device_id)
 
 #==============Set paths========================
 option = args.network
 if option == 'lenet5':
-    prototxt = '3_prototxt_solver/lenet5/train_val.prototxt'             
+    prototxt = '3_prototxt_solver/lenet5/train_val.prototxt'
     caffemodel = '4_model_checkpoint/lenet5/lenet5.caffemodel'
     solver_proto = '3_prototxt_solver/lenet5/finetune_solver.prototxt'
     iters = 100
     dir_t = '2_results/kmeans/lenet5/'
     snap_dir = '4_model_checkpoint/lenet5/snapshot/'
 elif option == 'alexnet':
-    prototxt = '3_prototxt_solver/L2/train_val.prototxt'             
+    prototxt = '3_prototxt_solver/L2/train_val.prototxt'
     solver_proto = '3_prototxt_solver/L2/finetune_solver.prototxt'
-    caffemodel = '4_model_checkpoint/alexnet/alexnet9x.caffemodel'  
+    caffemodel = '4_model_checkpoint/alexnet/alexnet9x.caffemodel'
     iters = 1000
     dir_t = '2_results/kmeans/alexnet/'
     snap_dir = '4_model_checkpoint/alexnet/snapshot/'
 elif option == 'vgg':
-    prototxt = '3_prototxt_solver/vgg16/train_val.prototxt'             
-    caffemodel = '4_model_checkpoint/vgg16/vgg16_12x.caffemodel'  
+    prototxt = '3_prototxt_solver/vgg16/train_val.prototxt'
+    caffemodel = '4_model_checkpoint/vgg16/vgg16_12x.caffemodel'
     solver_proto = '3_prototxt_solver/vgg16/finetune_solver.prototxt'
     iters = 1000
     dir_t = '2_results/kmeans/vgg16/'

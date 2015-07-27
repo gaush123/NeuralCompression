@@ -4,11 +4,12 @@ Created on Apr 18, 2015
 @author: huizi
 '''
 
+
 from kmeans_by_layer import *
 
 caffe.set_device(0)
 def main2():
-    bits_list = [2,3,4,6,8]
+    bits_list = [2, 3, 4, 6, 8]
 
     dir_t = '4_model_checkpoint/alexnet/'
     models = [dir_t + 'alexnet.caffemodel',

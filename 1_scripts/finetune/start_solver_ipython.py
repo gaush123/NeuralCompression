@@ -19,13 +19,13 @@ import caffe
 
 caffe.set_mode_gpu()
 caffe.set_device(3)
-prototxt = '3_prototxt_solver/L2/train_val.prototxt'          
-solver = '3_prototxt_solver/L2/finetune_solver.prototxt'      
+prototxt = '3_prototxt_solver/L2/train_val.prototxt'
+solver = '3_prototxt_solver/L2/finetune_solver.prototxt'
 caffemodel = '4_model_checkpoint/alexnet/alexnet9x.caffemodel'
 
-solver = caffe.SGDSolver(solver) 
-solver.net.copy_from(caffemodel) 
-net = solver.net                 
+solver = caffe.SGDSolver(solver)
+solver.net.copy_from(caffemodel)
+net = solver.net
 
 '''
 layers = filter(lambda x:'conv' in x or 'fc' in x, net.params.keys())

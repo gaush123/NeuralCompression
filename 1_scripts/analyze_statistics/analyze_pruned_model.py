@@ -17,7 +17,7 @@ print caffe_root
 sys.path.insert(0, caffe_root + 'python')
 import caffe
 
-def analyze_param(net, layers, fout = None):
+def analyze_param(net, layers, fout=None):
 #   plt.figure()
     print '\n=============analyze_param start==============='
     total_nonzero = 0
@@ -36,7 +36,7 @@ def analyze_param(net, layers, fout = None):
         print "Iter: ", iter
 
         for i, layer in enumerate(layers):
-            D = net.blobs[all_layers[all_layers.index(layer)-1]].data
+            D = net.blobs[all_layers[all_layers.index(layer) - 1]].data
 
             non_zero_D[i] += np.count_nonzero(D.flatten())
             all_param_D[i] += np.prod(D.shape)
@@ -48,7 +48,7 @@ def analyze_param(net, layers, fout = None):
     for i, layer in enumerate(layers):
         W = net.params[layer][0].data
         b = net.params[layer][1].data
-        D = net.blobs[all_layers[all_layers.index(layer)-1]].data
+        D = net.blobs[all_layers[all_layers.index(layer) - 1]].data
         this_layer_D = net.blobs[layer].data
         print layer,
         print "kernel shape=", W.shape
@@ -88,7 +88,7 @@ def analyze_param(net, layers, fout = None):
 
 
         if fout is not None:
-            fout.write('%s, %d, %d, %1.3f, %1.3f, %1.3f, ,%d , %d ,%d ,%d\n'%(layer, all_param, all_flops, this_layer_percentage_D, this_layer_percentage, flops_percent, non_zero, all_param_D[i], non_zero_D[i], non_zero_flops))
+            fout.write('%s, %d, %d, %1.3f, %1.3f, %1.3f, ,%d , %d ,%d ,%d\n' % (layer, all_param, all_flops, this_layer_percentage_D, this_layer_percentage, flops_percent, non_zero, all_param_D[i], non_zero_D[i], non_zero_flops))
 
     print '=====> summary:'
     print 'non-zero W and b cnt = %d' % total_nonzero
@@ -106,7 +106,7 @@ xls_file = '2_results/VGG16/res.xls'
 net = caffe.Net(prototxt, caffemodel, caffe.TEST)
 
 layers = filter(lambda x:'conv' in x or 'fc' in x, net.params.keys())
-fout = open(xls_file,'w')
+fout = open(xls_file, 'w')
 analyze_param(net, layers, fout)
 fout.close()
 

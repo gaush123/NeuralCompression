@@ -22,24 +22,24 @@ caffe.set_mode_gpu()
 caffe.set_device(1)
 option = 'alexnet'
 if option == 'lenet5':
-    prototxt = '3_prototxt_solver/lenet5/train_val.prototxt'             
+    prototxt = '3_prototxt_solver/lenet5/train_val.prototxt'
     caffemodel = '4_model_checkpoint/lenet5/lenet5.caffemodel'
     iters = 100
     dir_t = '2_results/kmeans/lenet5/'
 elif option == 'alexnet':
-    prototxt = '3_prototxt_solver/L2/train_val.prototxt'             
-    caffemodel = '4_model_checkpoint/alexnet/alexnet9x.caffemodel'  
+    prototxt = '3_prototxt_solver/L2/train_val.prototxt'
+    caffemodel = '4_model_checkpoint/alexnet/alexnet9x.caffemodel'
     iters = 1000
     dir_t = '2_results/kmeans/alexnet/'
 elif option == 'vgg':
-    prototxt = '3_prototxt_solver/vgg16/train_val.prototxt'             
-    caffemodel = '4_model_checkpoint/vgg16/vgg16_12x.caffemodel'  
+    prototxt = '3_prototxt_solver/vgg16/train_val.prototxt'
+    caffemodel = '4_model_checkpoint/vgg16/vgg16_12x.caffemodel'
     iters = 1000
     dir_t = '2_results/kmeans/vgg16/'
 
 log = dir_t + 'log_accu'
 
-def kmeans_net(net, layers, num_c = 16, initials=None):
+def kmeans_net(net, layers, num_c=16, initials=None):
     codebook = {}
     if type(num_c) == type(1):
         num_c = [num_c] * len(layers)
@@ -51,15 +51,15 @@ def kmeans_net(net, layers, num_c = 16, initials=None):
         print "Eval layer:", layer
         W = net.params[layer][0].data.flatten()
         W = W[np.where(W != 0)]
-        if initials is None: #Default: uniform sample
+        if initials is None:  # Default: uniform sample
             std = np.std(W)
             initial_uni = np.linspace(-4 * std, 4 * std, num_c[idx] - 1)
-            codebook[layer],_= scv.kmeans(W, initial_uni)
+            codebook[layer], _ = scv.kmeans(W, initial_uni)
             '''
             codebook[layer],_= scv.kmeans(W, num_c[idx] - 1)
             '''
         elif type(initials) == type(np.array([])):
-            codebook[layer],_= scv.kmeans(W, initials)
+            codebook[layer], _ = scv.kmeans(W, initials)
         else:
             print type(initials)
             return None
@@ -85,12 +85,12 @@ def parse_caffe_log(log):
     return map(lambda x: float(x.split()[-1]), lines[-3:-1])
 
 
-def main(choice = [64,16] ):
+def main(choice=[64, 16]):
     net = caffe.Net(prototxt, caffemodel, caffe.TEST)
 # layers = filter(lambda x:'conv' in x or 'fc' in x or 'ip' in x, net.params.keys())
     layers = filter(lambda x:'conv' in x or 'fc' in x or 'ip' in x, net.params.keys())
 
-    num_c = [choice[0]]  * (len(layers)-3) + [choice[1]] * 3
+    num_c = [choice[0]] * (len(layers) - 3) + [choice[1]] * 3
     codebook = kmeans_net(net, layers, num_c)
 
 
@@ -99,4 +99,4 @@ def main(choice = [64,16] ):
     net.save(caffemodel + '.update')
 
 if __name__ == "__main__":
-    main([256,16])
+    main([256, 16])

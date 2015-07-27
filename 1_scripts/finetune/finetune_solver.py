@@ -12,8 +12,8 @@ start_time = time.time()
 
 for i in xrange(1500):
     solver.step(1)
-    if (i+1) % 1000 == 0 and args.normalize_flag:
+    if (i + 1) % 1000 == 0 and args.normalize_flag:
         args.lr /= 10
     update_codebook_net(net, codebook, codeDict, maskCode, args=args, update_layers=update_layers)
     if args.timing:
-        print "Iter:%d, Time cost:%f"%(i, time.time() - start_time)
+        print "Iter:%d, Time cost:%f" % (i, time.time() - start_time)
