@@ -10,7 +10,7 @@ print "================3 Perform fintuning=============="
 
 start_time = time.time()
 
-for i in xrange(2500):
+for i in xrange(1500):
     solver.step(1)
     if (i+1) % 1000 == 0 and args.normalize_flag:
         args.lr /= 10

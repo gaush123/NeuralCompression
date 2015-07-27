@@ -20,8 +20,9 @@ def kmeans_net(net, layers, num_c = 16, initials=None, method='linear',compress=
         W = W[np.where(W != 0)]                                         
         if initials is None: #Default: uniform sample                   
             if method=='linear':
-                std = np.std(W)                                             
-                initial_uni = np.linspace(-4 * std, 4 * std, num_c[idx] - 1)
+                min_W = np.min(W)                                         
+                max_W = np.max(W)                                         
+                initial_uni = np.linspace(min_W, max_W, num_c[idx] - 1)   
                 codebook[layer],_= scv.kmeans(W, initial_uni, compress=compress)               
             elif method == 'random':
                 codebook[layer],_= scv.kmeans(W, num_c[idx]-1, compress=compress)               
@@ -94,7 +95,7 @@ def static_vars(**kwargs):
         return func
     return decorate
 
-@static_vars(step_cache={}, step_cache2={}, initial=False)
+@static_vars(step_cache={}, step_cache2={}, count=0)
 def update_codebook_net(net, codebook, codeDict, maskCode, args, update_layers=None, snapshot=None):
 
     start_time = time.time()
@@ -109,7 +110,7 @@ def update_codebook_net(net, codebook, codeDict, maskCode, args, update_layers=N
     if update_method == 'rmsprop':
         extra_lr /= 100
 
-    if not update_codebook_net.initial:
+    if update_codebook_net.count== 0:
         step_cache2 = update_codebook_net.step_cache2
         step_cache = update_codebook_net.step_cache
         if update_method=='adadelta':
@@ -124,11 +125,12 @@ def update_codebook_net(net, codebook, codeDict, maskCode, args, update_layers=N
             for code in xrange(1, len(codebook[layer])):
                 step_cache[layer][code] = 0.0
         
-        update_codebook_net.initial = True
+        update_codebook_net.count= 1
 
     else:
         step_cache2 = update_codebook_net.step_cache2
         step_cache = update_codebook_net.step_cache
+        update_codebook_net.count += 1
 
 
     total_layers = net.params.keys()
@@ -174,8 +176,12 @@ def update_codebook_net(net, codebook, codeDict, maskCode, args, update_layers=N
     if args.timing:
         print "Update codebook time:%f"%(time.time() - start_time)
 
-    if snapshot is not None:
-        pickle.dump(codebook, open(snapshot, 'w'))
+    if args.snapshot=='bias':
+        bias = {}
+        for layer in total_layers:
+            bias[layer] = net.params[layer][1].data
+        pickle.dump(bias, open('2_results/kmeans/alexnet/bias_snapshot/bias%d'%update_codebook_net.count, 'w'))
+
 
 def store_all(net, codebook, dir_t, idx=0):
     net.save(dir_t + 'caffemodel%d'%idx)
@@ -204,3 +210,20 @@ def recover_all(net, dir_t, idx=0):
     return codebook, maskCode, codeDict
 
 
+def analyze_log(fileName):                 
+    data = open(fileName, "r")             
+    y = []                                 
+    for line in data:                      
+        y.append(float(line.split()[0]))   
+    return y                               
+
+def get_accuracy(logName, folder='tmp/'):
+    caffe_root = os.environ["CAFFE_ROOT"]
+    os.system(caffe_root + '/1_scripts/extract_trace.sh ' + logName + ' ' + folder)  
+    fileName1 = caffe_root + "/2_results/" + folder + "test_acc_top1.csv"             
+    fileName5 = caffe_root + "/2_results/" + folder + "test_acc_top5.csv"             
+    top1 = analyze_log(fileName1)
+    top5 = analyze_log(fileName5)
+    if top5 == []:
+        top5 = [0]
+    return top1[0], top5[0], max(top1), max(top5)

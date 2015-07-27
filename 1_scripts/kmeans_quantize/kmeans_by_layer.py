@@ -12,7 +12,7 @@ import scipy.cluster.vq as scv
 import pickle
 from kmeans import *
 
-caffe.set_device(0)
+caffe.set_device(3)
 log = log + '.layer'
 def eval_accu_layerwise(prototxt, caffemodel, bits_list, log):
     net = caffe.Net(prototxt, caffemodel, caffe.TEST)

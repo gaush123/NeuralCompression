@@ -32,6 +32,9 @@ parser.add_argument('--finetune-codebook-iters', dest='co_iters', type=int, defa
 parser.add_argument('--accumulate-diff-iters', dest='ac_iters', type=int, default=10)  
 parser.add_argument('--stochastic', dest='use_stochastic', action='store_true')  
 
+#=============For Snapshot=====================
+parser.add_argument('--snapshot', dest='snapshot', type=str, default='None')  
+
 parser.set_defaults(timing=False, kmeans_compress=True, normalize_flag=False, average_flag=True, use_stochastic=False)
 
 args = parser.parse_args()
@@ -49,7 +52,7 @@ option = args.network
 if option == 'lenet5':
     prototxt = '3_prototxt_solver/lenet5/train_val.prototxt'             
     caffemodel = '4_model_checkpoint/lenet5/lenet5.caffemodel'
-    solver_proto = '3_prototxt_solver/lenet5/lenet_solver_finetune.prototxt'
+    solver_proto = '3_prototxt_solver/lenet5/finetune_solver.prototxt'
     iters = 100
     dir_t = '2_results/kmeans/lenet5/'
     snap_dir = '4_model_checkpoint/lenet5/snapshot/'
@@ -63,12 +66,13 @@ elif option == 'alexnet':
 elif option == 'vgg':
     prototxt = '3_prototxt_solver/vgg16/train_val.prototxt'             
     caffemodel = '4_model_checkpoint/vgg16/vgg16_12x.caffemodel'  
+    solver_proto = '3_prototxt_solver/vgg16/finetune_solver.prototxt'
     iters = 1000
     dir_t = '2_results/kmeans/vgg16/'
 log = dir_t + 'log_accu'
 
 #==================Initializa solver and net==========
-solver = caffe.NesterovSolver(solver_proto)
+solver = caffe.SGDSolver(solver_proto)
 
 solver.net.copy_from(caffemodel)
 net = solver.net

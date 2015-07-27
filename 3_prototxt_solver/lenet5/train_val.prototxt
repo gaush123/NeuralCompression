@@ -163,12 +163,13 @@ layer {
   }
 }
 layer {
-  name: "accuracy"
+  name: "accuracy_top1"
   type: "Accuracy"
   bottom: "ip2"
   bottom: "label"
-  top: "accuracy"
+  top: "accuracy_top1"
 }
+
 layer {
   name: "loss"
   type: "SoftmaxWithLoss"

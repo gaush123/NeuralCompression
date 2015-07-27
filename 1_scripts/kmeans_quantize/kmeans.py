@@ -19,7 +19,7 @@ sys.path.insert(0, caffe_root + 'python')
 import caffe
 
 caffe.set_mode_gpu()
-caffe.set_device(1)
+caffe.set_device(2)
 option = 'alexnet'
 if option == 'lenet5':
     prototxt = '3_prototxt_solver/lenet5/train_val.prototxt'             
@@ -52,8 +52,9 @@ def kmeans_net(net, layers, num_c = 16, initials=None):
         W = net.params[layer][0].data.flatten()
         W = W[np.where(W != 0)]
         if initials is None: #Default: uniform sample
-            std = np.std(W)
-            initial_uni = np.linspace(-4 * std, 4 * std, num_c[idx] - 1)
+            min_W = np.min(W)
+            max_W = np.max(W)
+            initial_uni = np.linspace(min_W, max_W, num_c[idx] - 1)
             codebook[layer],_= scv.kmeans(W, initial_uni, compress=False)
             '''
             codebook[layer],_= scv.kmeans(W, num_c[idx] - 1)
@@ -116,7 +117,7 @@ def main(choice = [64,16] ):
     layers = filter(lambda x:'conv' in x or 'fc' in x or 'ip' in x, net.params.keys())
 
 # Evaluate the origina accuracy
-    command = caffe_root + "/build/tools/caffe test --model=" + prototxt + " --weights=" + caffemodel + " --iterations=%d --gpu 2 2>"%iters +log
+    command = caffe_root + "/build/tools/caffe test --model=" + prototxt + " --weights=" + caffemodel + " --iterations=%d --gpu 1 2>"%iters +log
     #print command
     # os.system(command)
     #os.system('tail -n 3 '+ log)
@@ -124,15 +125,23 @@ def main(choice = [64,16] ):
     num_c = [choice[0]]  * (len(layers)-3) + [choice[1]] * 3
     codebook = kmeans_net(net, layers, num_c)
 
+    pickle.dump(codebook, open(dir_t + 'codebook.pkl', 'w'))
     quantize_net(net, codebook)
 
 # Evaluate the new model's accuracy
+    '''
     net.save(caffemodel + '.quantize')
-    command = caffe_root + "/build/tools/caffe test --model=" + prototxt + " --weights=" + caffemodel + ".quantize --iterations=%d --gpu 2 2>"%iters +log + "new"
+    command = caffe_root + "/build/tools/caffe test --model=" + prototxt + " --weights=" + caffemodel + ".quantize --iterations=%d --gpu 1 2>"%iters +log + "new"
     #print command
     print choice
     os.system(command)
     os.system('tail -n 3 '+ log + 'new')
+
+    top_1,top_5 = parse_caffe_log(log + 'new')
+    with open('results_%s'%option,'a+') as f:
+        f.write('%d %d \n%f\n%f\n'%(choice[0], choice[1], top_1, top_5))
+    '''
+
 
 
 def main2():
@@ -141,7 +150,7 @@ def main2():
     layers = filter(lambda x:'conv' in x or 'fc' in x or 'ip' in x, net.params.keys())
 
 # Evaluate the origina accuracy
-    command = caffe_root + "/build/tools/caffe test --model=" + prototxt + " --weights=" + caffemodel + " --iterations=%d --gpu 2 2>"%iters +log
+    command = caffe_root + "/build/tools/caffe test --model=" + prototxt + " --weights=" + caffemodel + " --iterations=%d --gpu 1 2>"%iters +log
     print command
     # os.system(command)
     os.system('tail -n 3 '+ log)
@@ -156,7 +165,7 @@ def main2():
 
 # Evaluate the new model's accuracy
     net.save(caffemodel + '.quantize')
-    command = caffe_root + "/build/tools/caffe test --model=" + prototxt + " --weights=" + caffemodel + ".quantize --iterations=%d --gpu 2 2>"%iters +log + "new"
+    command = caffe_root + "/build/tools/caffe test --model=" + prototxt + " --weights=" + caffemodel + ".quantize --iterations=%d --gpu 1 2>"%iters +log + "new"
     print command
     os.system(command)
     os.system('tail -n 3 '+ log + 'new')
@@ -164,11 +173,9 @@ def main2():
 if __name__ == "__main__":
     '''
     main([256,8])
-    main([256,16])
     main([64,8])
     main([64,16])
     main([256,16])
     main2()
     '''
     main([64,16])
-    main([64,32])
