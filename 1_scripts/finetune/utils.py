@@ -6,7 +6,7 @@ import scipy.cluster.vq_maohz as scv
 import pickle
 import time
 
-def kmeans_net(net, layers, num_c=16, initials=None, method='linear', compress=True):
+def kmeans_net(net, layers, num_c=16, initials=None, method='linear', compress=False):
     codebook = {}
     if type(num_c) == type(1):
         num_c = [num_c] * len(layers)

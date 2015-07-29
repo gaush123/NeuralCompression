@@ -20,7 +20,7 @@ sys.path.insert(0, caffe_root + 'python')
 import caffe
 
 caffe.set_mode_gpu()
-caffe.set_device(2)
+caffe.set_device(0)
 option = 'alexnet'
 if option == 'lenet5':
     prototxt = '3_prototxt_solver/lenet5/train_val.prototxt'
@@ -40,7 +40,7 @@ elif option == 'vgg':
 
 log = dir_t + 'log_accu'
 
-def kmeans_net(net, layers, num_c=16, initials=None):
+def kmeans_net(net, layers, num_c=16, initials=None, snapshot=False):
     codebook = {}
     if type(num_c) == type(1):
         num_c = [num_c] * len(layers)
@@ -56,7 +56,16 @@ def kmeans_net(net, layers, num_c=16, initials=None):
             min_W = np.min(W)
             max_W = np.max(W)
             initial_uni = np.linspace(min_W, max_W, num_c[idx] - 1)
-            codebook[layer], _ = scv.kmeans(W, initial_uni, compress=False)
+            ''' # Legacy
+            std = np.std(W)
+            initial_uni = np.linspace(std * -4, std * 4, num_c[idx] - 1)
+            '''
+
+            if snapshot and layer=='fc6':
+                codebook[layer], _, codebook_history = scv.kmeans(W, initial_uni, compress=False, snapshot=True)
+            else:
+                codebook[layer], _= scv.kmeans(W, initial_uni, compress=False)
+
             '''
             codebook[layer],_= scv.kmeans(W, num_c[idx] - 1)
             '''
@@ -67,6 +76,10 @@ def kmeans_net(net, layers, num_c=16, initials=None):
             return None
         codebook[layer] = np.append(0.0, codebook[layer])
         print "codebook size:", len(codebook[layer])
+
+    if snapshot:
+        return codebook, codebook_history
+
     return codebook
 def stochasitc_quantize2(W, codebook):
 
@@ -111,8 +124,31 @@ def parse_caffe_log(log):
     lines = open(log).readlines()
     return map(lambda x: float(x.split()[-1]), lines[-3:-1])
 
+def test_quantize_accu(choice = [6,4]):
+    net = caffe.Net(prototxt, caffemodel, caffe.TEST)
+    layers = filter(lambda x:'conv' in x or 'fc' in x or 'ip' in x, net.params.keys())
 
-def main(choice=[64, 16]):
+    if len(choice) == 2:                                                  
+        if option == 'lenet5':                                            
+            bits_list = [choice[0]] * (len(layers) - 2) + [choice[1]] * 2 
+        else:                                                             
+            bits_list = [choice[0]] * (len(layers) - 3) + [choice[1]] * 3 
+    else:                                                                 
+        assert len(choice) == len(layers)                                 
+        bits_list = choice                                                
+
+    num_c = map(lambda x: 2 ** x, bits_list )
+    codebook = kmeans_net(net, layers, num_c)
+    quantize_net(net, codebook)
+    net.save(caffemodel + '.quantize')
+    command = caffe_root + "/build/tools/caffe test --model=" + prototxt + " --weights=" + caffemodel + ".quantize --iterations=%d --gpu 1 2>"%iters +log + "new"
+    os.system(command)
+    accu_top1, accu_top5 = parse_caffe_log(log + 'new')
+    return accu_top1, accu_top5
+
+
+
+def main(choice=[64, 16], snapshot=False):
     net = caffe.Net(prototxt, caffemodel, caffe.TEST)
 # layers = filter(lambda x:'conv' in x or 'fc' in x or 'ip' in x, net.params.keys())
     layers = filter(lambda x:'conv' in x or 'fc' in x or 'ip' in x, net.params.keys())
@@ -124,13 +160,17 @@ def main(choice=[64, 16]):
     # os.system('tail -n 3 '+ log)
 
     num_c = [choice[0]] * (len(layers) - 3) + [choice[1]] * 3
-    codebook = kmeans_net(net, layers, num_c)
+    if snapshot:
+        codebook, codebook_history = kmeans_net(net, layers, num_c, snapshot=True)
+        pickle.dump(codebook_history, open(dir_t + 'codebook_history_4std.pkl', 'w'))
+    else:
+        codebook = kmeans_net(net, layers, num_c, snapshot=False)
 
-    pickle.dump(codebook, open(dir_t + 'codebook.pkl', 'w'))
+    pickle.dump(codebook, open(dir_t + 'codebook_4std.pkl', 'w'))
     quantize_net(net, codebook)
 
 # Evaluate the new model's accuracy
-    '''
+'''
     net.save(caffemodel + '.quantize')
     command = caffe_root + "/build/tools/caffe test --model=" + prototxt + " --weights=" + caffemodel + ".quantize --iterations=%d --gpu 1 2>"%iters +log + "new"
     #print command
@@ -141,8 +181,7 @@ def main(choice=[64, 16]):
     top_1,top_5 = parse_caffe_log(log + 'new')
     with open('results_%s'%option,'a+') as f:
         f.write('%d %d \n%f\n%f\n'%(choice[0], choice[1], top_1, top_5))
-    '''
-
+'''
 
 
 def main2():
@@ -179,4 +218,4 @@ if __name__ == "__main__":
     main([256,16])
     main2()
     '''
-    main([64, 16])
+    main([64, 16], True)

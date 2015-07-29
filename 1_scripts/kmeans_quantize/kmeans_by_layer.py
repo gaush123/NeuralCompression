@@ -46,7 +46,7 @@ def eval_accu_layerwise(prototxt, caffemodel, bits_list, log):
     return (accu_top1, accu_top5)
 
 def main1():
-    bits_list = [2, 3, 4, 8]
+    bits_list = [1,2, 3, 4,5,6,7, 8]
 
     accu_top1, accu_top5 = eval_accu_layerwise(prototxt, caffemodel, bits_list, log)
     np.save(dir_t + 'accu_top1', accu_top1)

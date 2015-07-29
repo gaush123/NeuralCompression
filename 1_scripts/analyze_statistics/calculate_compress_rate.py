@@ -89,6 +89,7 @@ elif option == 'vgg':
 net = caffe.Net(prototxt, caffemodel, caffe.TEST)
 
 layers = filter(lambda x:'conv' in x or 'fc' in x or 'ip' in x, net.params.keys())
+
 def main(choice=[4, 3, 5], fout=None):
     if option == 'lenet5':
         bits_list = [choice[0]] * (len(layers) - 2) + [choice[1]] * 2
@@ -102,13 +103,17 @@ def main(choice=[4, 3, 5], fout=None):
     print "Compression rate:", rate
 
 def get_results(choice=[4, 3], file_out=''):
-    if option == 'lenet5':
-        bits_list = [choice[0]] * (len(layers) - 2) + [choice[1]] * 2
+    if len(choice) == 2:
+        if option == 'lenet5':
+            bits_list = [choice[0]] * (len(layers) - 2) + [choice[1]] * 2
+        else:
+            bits_list = [choice[0]] * (len(layers) - 3) + [choice[1]] * 3
     else:
-        bits_list = [choice[0]] * (len(layers) - 3) + [choice[1]] * 3
+        assert len(choice) == len(layers)
+        bits_list = choice
 
     rate_min = 1.0
-    for location_bits in range(1, 9):
+    for location_bits in range(4, 7):
         rate = analyze_comprate(net, layers, bits_list, [location_bits] * len(layers))
         if rate < rate_min:
             rate_min = rate
