@@ -40,7 +40,7 @@ elif option == 'vgg':
 
 log = dir_t + 'log_accu'
 
-def kmeans_net(net, layers, num_c=16, initials=None, snapshot=False):
+def kmeans_net(net, layers, num_c=16, initials=None, snapshot=False, alpha=0.0):
     codebook = {}
     if type(num_c) == type(1):
         num_c = [num_c] * len(layers)
@@ -62,18 +62,18 @@ def kmeans_net(net, layers, num_c=16, initials=None, snapshot=False):
             '''
 
             if snapshot and layer=='fc6':
-                codebook[layer], _, codebook_history = scv.kmeans(W, initial_uni, compress=False, snapshot=True)
+                codebook[layer], _, codebook_history = scv.kmeans(W, initial_uni, compress=False, snapshot=True, alpha=alpha)
             else:
-                codebook[layer], _= scv.kmeans(W, initial_uni, compress=False)
+                codebook[layer], _= scv.kmeans(W, initial_uni, compress=False, alpha=alpha)
 
             '''
             codebook[layer],_= scv.kmeans(W, num_c[idx] - 1)
             '''
         elif type(initials) == type(np.array([])):
             codebook[layer], _ = scv.kmeans(W, initials)
-        else:
-            print type(initials)
-            return None
+        elif initials == 'random':
+            codebook[layer], _ = scv.kmeans(W, num_c[idx]-1)
+            
         codebook[layer] = np.append(0.0, codebook[layer])
         print "codebook size:", len(codebook[layer])
 
@@ -122,11 +122,17 @@ def quantize_net(net, codebook, use_stochastic=False):
 
 def parse_caffe_log(log):
     lines = open(log).readlines()
-    return map(lambda x: float(x.split()[-1]), lines[-3:-1])
+    try:
+        res = map(lambda x: float(x.split()[-1]), lines[-3:-1])
+    except Exception as e:
+        print e
+        res = [0.0,0.0]
+    return res
 
-def test_quantize_accu(choice = [6,4]):
+def test_quantize_accu(choice = [6,4], layers = None, alpha=1.0):
     net = caffe.Net(prototxt, caffemodel, caffe.TEST)
-    layers = filter(lambda x:'conv' in x or 'fc' in x or 'ip' in x, net.params.keys())
+    if layers is None:
+        layers = filter(lambda x:'conv' in x or 'fc' in x or 'ip' in x, net.params.keys())
 
     if len(choice) == 2:                                                  
         if option == 'lenet5':                                            
@@ -138,13 +144,13 @@ def test_quantize_accu(choice = [6,4]):
         bits_list = choice                                                
 
     num_c = map(lambda x: 2 ** x, bits_list )
-    codebook = kmeans_net(net, layers, num_c)
+    codebook = kmeans_net(net, layers, num_c, alpha=alpha)
     quantize_net(net, codebook)
     net.save(caffemodel + '.quantize')
-    command = caffe_root + "/build/tools/caffe test --model=" + prototxt + " --weights=" + caffemodel + ".quantize --iterations=%d --gpu 1 2>"%iters +log + "new"
+    command = caffe_root + "/build/tools/caffe test --model=" + prototxt + " --weights=" + caffemodel + ".quantize --iterations=%d --gpu 0 2>"%iters +log + "new"
     os.system(command)
     accu_top1, accu_top5 = parse_caffe_log(log + 'new')
-    return accu_top1, accu_top5
+    return (accu_top1, accu_top5)
 
 
 
@@ -166,7 +172,7 @@ def main(choice=[64, 16], snapshot=False):
     else:
         codebook = kmeans_net(net, layers, num_c, snapshot=False)
 
-    pickle.dump(codebook, open(dir_t + 'codebook_4std.pkl', 'w'))
+    pickle.dump(codebook, open(dir_t + 'codebook.pkl', 'w'))
     quantize_net(net, codebook)
 
 # Evaluate the new model's accuracy
@@ -182,7 +188,6 @@ def main(choice=[64, 16], snapshot=False):
     with open('results_%s'%option,'a+') as f:
         f.write('%d %d \n%f\n%f\n'%(choice[0], choice[1], top_1, top_5))
 '''
-
 
 def main2():
     net = caffe.Net(prototxt, caffemodel, caffe.TEST)
@@ -210,6 +215,16 @@ def main2():
     os.system(command)
     os.system('tail -n 3 ' + log + 'new')
 
+def test_weighted_kmeans():
+
+    settings = [[4,2],[5,2], [8,3], [10,5]]
+    alphas = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.2, 1.5]
+    f = open('tmp/alphatest.csv','w')
+    for setting in settings:
+        for alpha in alphas:
+            f.write('%d, %d, %f, %f, %f\n'%((tuple(setting) + (alpha,) + test_quantize_accu(setting, alpha=alpha))))
+    f.close()
+
 if __name__ == "__main__":
     '''
     main([256,8])
@@ -218,4 +233,6 @@ if __name__ == "__main__":
     main([256,16])
     main2()
     '''
-    main([64, 16], True)
+    # main([64,16])
+    # print test_quantize_accu([3], ['conv5'], alpha=1.0)
+    test_weighted_kmeans()

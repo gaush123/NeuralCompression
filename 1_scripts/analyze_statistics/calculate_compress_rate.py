@@ -85,6 +85,10 @@ elif option == 'vgg':
     caffemodel = '4_model_checkpoint/vgg16/vgg16_12x.caffemodel'
     solver_proto = '3_prototxt_solver/L2/finetune_solver.prototxt'
     snap_dir = '4_model_checkpoint/4_model_checkpoint/vgg16/snapshot/'
+elif option == 'lenet_300':
+    prototxt = '3_prototxt_solver/lenet_300_100/train_val.prototxt'
+    caffemodel = '4_model_checkpoint/lenet_300_100/lenet300_100_9x.caffemodel'
+    solver_proto = '3_prototxt_solver/lenet_300_100/finetune_solver.prototxt'
 
 net = caffe.Net(prototxt, caffemodel, caffe.TEST)
 
@@ -106,6 +110,8 @@ def get_results(choice=[4, 3], file_out=''):
     if len(choice) == 2:
         if option == 'lenet5':
             bits_list = [choice[0]] * (len(layers) - 2) + [choice[1]] * 2
+        elif option == 'lenet_300':
+            bits_list = [choice[1]] * len(layers)
         else:
             bits_list = [choice[0]] * (len(layers) - 3) + [choice[1]] * 3
     else:
@@ -127,12 +133,10 @@ def get_results(choice=[4, 3], file_out=''):
 
 if __name__ == "__main__":
     # print get_results(choice = map(lambda x:int(x), sys.argv[1:3]))
-    log_file = 'compress_lenet'
-    get_results([5, 3], log_file)
-    get_results([4, 3], log_file)
-    get_results([4, 2], log_file)
-    get_results([8, 5], log_file)
-    get_results([8, 6], log_file)
-    get_results([6, 4], log_file)
-    get_results([6, 3], log_file)
-    get_results([5, 4], log_file)
+    log_file = 'compress_lenet_300'
+    get_results([5, 10], log_file)
+    get_results([4, 8], log_file)
+    get_results([4, 6], log_file)
+    get_results([8, 4], log_file)
+    get_results([8, 3], log_file)
+    get_results([5, 2], log_file)

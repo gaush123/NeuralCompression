@@ -69,6 +69,12 @@ elif option == 'vgg':
     solver_proto = '3_prototxt_solver/vgg16/finetune_solver.prototxt'
     iters = 1000
     dir_t = '2_results/kmeans/vgg16/'
+elif option == 'lenet_300':
+    prototxt = '3_prototxt_solver/lenet_300_100/train_val.prototxt'
+    caffemodel = '4_model_checkpoint/lenet_300_100/lenet300_100_9x.caffemodel'
+    solver_proto = '3_prototxt_solver/lenet_300_100/finetune_solver.prototxt'
+    iters = 100
+    dir_t = '2_results/kmeans/lenet_300_100/'
 log = dir_t + 'log_accu'
 
 #==================Initializa solver and net==========

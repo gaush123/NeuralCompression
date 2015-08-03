@@ -1,12 +1,9 @@
 import sys, os
 from utils import analyze_log, get_accuracy
 
-settings_str = ['4 4 4 4 4 2 2 3     ',
-'6 6 6 6 6 2 2 2      ',
-'6 6 10 10 10 2 2 3   ',
-'6 6 6 10 10 2 3 3    ',
-'10 10 10 10 10 2 2 3 ',
-'6 6 6 6 6 3 3 3      ']
+settings_str = ['8 8 8 6 6 2 2 3',
+'8 8 8 6 5 2 2 3',
+'8 8 6 6 5 2 2 3']
 
 settings = map(lambda x:map(lambda y:int(y), x.split()), settings_str)
 print settings

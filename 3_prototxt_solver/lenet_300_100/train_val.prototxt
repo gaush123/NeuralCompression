@@ -121,7 +121,7 @@ layer {
   type: "Accuracy"
   bottom: "ip3"
   bottom: "label"
-  top: "accuracy"
+  top: "accuracy_top1"
   include {
     #phase: TEST
   }

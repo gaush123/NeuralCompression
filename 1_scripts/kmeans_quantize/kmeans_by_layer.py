@@ -12,7 +12,7 @@ import scipy.cluster.vq as scv
 import pickle
 from kmeans import *
 
-caffe.set_device(3)
+caffe.set_device(0)
 log = log + '.layer'
 def eval_accu_layerwise(prototxt, caffemodel, bits_list, log):
     net = caffe.Net(prototxt, caffemodel, caffe.TEST)
@@ -20,6 +20,7 @@ def eval_accu_layerwise(prototxt, caffemodel, bits_list, log):
     layers = map(lambda x: [x], layers)
     layers.append(filter(lambda x: 'conv' in x, net.params.keys()))
     layers.append(filter(lambda x: 'fc' in x or 'ip' in x, net.params.keys()))
+    layers.append(filter(lambda x: 'conv' in x or 'fc' in x or 'ip' in x, net.params.keys()))
 
     accu_top1 = np.zeros((len(layers), len(bits_list)))
     accu_top5 = np.zeros((len(layers), len(bits_list)))

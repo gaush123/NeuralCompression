@@ -5,15 +5,18 @@ def get_initials(data, bits, types_init=3):
     std = np.std(data)
     iters = types_init / 3
     res = []
-    initial1 = None
-    initial2 = np.linspace(-4 * std, 4 * std, 2 ** bits)
+    initial1 = 'random'
+    min_W = np.min(data)
+    max_W = np.max(data)
+    initial2 = np.linspace(min_W, max_W, 2 ** bits -1)
 
-    thresh = np.linspace(-4 * std, 4 * std, 2 ** (bits + 2))
+    thresh = np.linspace(-5 * std, 5 * std, 2 ** (bits + 2))
     number_down_thresh = np.array(map(lambda x: np.count_nonzero(data < x), thresh))
 
     # Optional: whether to soften the density curve?
-    wanted_division = np.linspace(0, data.size, 2 ** (bits + 1))[1::2]
-    thresh = np.append(5 * std, thresh)
+    wanted_division = np.linspace(0, data.size, 2 ** (bits + 1)-2)[1::2]
+    print "wanted divison", wanted_division
+    thresh = np.append(max_W, thresh)
     initial3 = np.array(map(lambda x: thresh[np.count_nonzero(number_down_thresh < x)], wanted_division))
     epsilon = 0.05 * std / (2 ** bits)
     initial3 += (np.array(range(len(initial3))) - len(initial3) / 2) * epsilon
@@ -24,7 +27,7 @@ def get_initials(data, bits, types_init=3):
 def eval_initials(prototxt, caffemodel, bits_list, log, layer):
     net = caffe.Net(prototxt, caffemodel, caffe.TEST)
 
-    types_init = 6
+    types_init = 3
 
     accu_top1 = np.zeros((types_init, len(bits_list)))
     accu_top5 = np.zeros((types_init, len(bits_list)))
@@ -54,8 +57,8 @@ def eval_initials(prototxt, caffemodel, bits_list, log, layer):
 
     return (accu_top1, accu_top5)
 
-def main2():
-    bits_list = [2, 3, 4, 6, 8]
+def main_init():
+    bits_list = [1, 2, 3, 4, 5, 6, 7, 8]
     layer = 'conv2'
     caffemodel = '4_model_checkpoint/alexnet/alexnet9x.caffemodel'
     accu_top1, accu_top5 = eval_initials(prototxt, caffemodel, bits_list, log, layer)
@@ -68,10 +71,11 @@ def test():
     data = np.random.normal(0, 1, 1000)
     initis = get_initials(data, 2, 2)
     print initis[1]
-    initis = get_initials(data, 6, 2)
+    initis = get_initials(data, 1, 2)
     print initis[1]
-    initis = get_initials(data, 7, 2)
+    initis = get_initials(data, 4, 2)
     print initis[1]
 
 if __name__ == "__main__":
-    main2()
+    main_init()
+    # test()
