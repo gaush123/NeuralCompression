@@ -28,7 +28,7 @@ def analyze_comprate(net, layers, params_bits, location_bits=None, encoding='pac
         for idx, layer in enumerate(layers):
             num_ori += net.params[layer][0].data.size * 32
             num_ori += net.params[layer][1].data.size * 32
-            max_length = 2 ** location_bits[idx]
+            max_length = 2 ** location_bits[idx] - 1
 
             non_zeros_loc = np.where(net.params[layer][0].data.flatten() != 0.0)[0]
             distance_loc = non_zeros_loc[1:] - non_zeros_loc[:-1]
@@ -37,21 +37,11 @@ def analyze_comprate(net, layers, params_bits, location_bits=None, encoding='pac
 
             total_extra_slots += extra_slots
             total_non_zeros += non_zeros
-            num_new += (non_zeros + extra_slots) * (params_bits[idx] + location_bits[idx])
-            total_param_num += (non_zeros + extra_slots) * params_bits[idx]
+            num_new += (non_zeros ) * (params_bits[idx] + location_bits[idx]) + extra_slots * location_bits[idx]
+            total_param_num += (non_zeros ) * params_bits[idx]
             num_new += net.params[layer][1].data.size * 32
 
-            print "Layer:", layer
-            print "Extra slots:", extra_slots
-            print "Non-zeros:", non_zeros
-            print "Extra slots rate", float(extra_slots) / non_zeros
-            print "====================================="
-
-
-        print "total extra slots ratio:"
         extra_ratio = float(total_extra_slots) / (total_non_zeros + total_extra_slots)
-        print extra_ratio
-
         # Codebooks
         ndlist = np.array(params_bits)
         codebook_size = 32 * np.sum(2 ** ndlist)
@@ -64,14 +54,14 @@ def analyze_comprate(net, layers, params_bits, location_bits=None, encoding='pac
         if fout is not None:
             fout.write('%f, %f, %f, %f, %f\n' % (comp_rate, codebook_ratio, params_ratio, loc_ratio, extra_ratio))
 
-        return comp_rate
+        return comp_rate, codebook_ratio, params_ratio
     else:
         raise Exception("Unsupported encoding method!")
 
 
 caffe.set_mode_gpu()
 caffe.set_device(1)
-option = 'alexnet'
+option = 'lenet5'
 if option == 'lenet5':
     prototxt = '3_prototxt_solver/lenet5/train_val.prototxt'
     caffemodel = '4_model_checkpoint/lenet5/lenet5.caffemodel'
@@ -120,23 +110,104 @@ def get_results(choice=[4, 3], file_out=''):
 
     rate_min = 1.0
     for location_bits in range(4, 7):
-        rate = analyze_comprate(net, layers, bits_list, [location_bits] * len(layers))
+        rate, a, b = analyze_comprate(net, layers, bits_list, [location_bits] * len(layers))
         if rate < rate_min:
             rate_min = rate
             optimal_loc_bits = location_bits
+            codebook_ratio = a
+            params_ratio  = b
 
+        print "rate:", rate
     if file_out == '':
         return optimal_loc_bits, rate_min
     with open(file_out, 'a+') as f:
-        f.write('%d, %f\n' % (optimal_loc_bits, rate_min))
+        f.write('%d, %f, %f, %f\n' % (optimal_loc_bits, rate_min, codebook_ratio, params_ratio))
     return
 
-if __name__ == "__main__":
+
+def test_alexnet():
     # print get_results(choice = map(lambda x:int(x), sys.argv[1:3]))
-    log_file = 'compress_lenet_300'
-    get_results([5, 10], log_file)
-    get_results([4, 8], log_file)
-    get_results([4, 6], log_file)
-    get_results([8, 4], log_file)
-    get_results([8, 3], log_file)
-    get_results([5, 2], log_file)
+    log_file = 'tmp/compress_alexnet'
+    settings = [[8  ,4  ],
+    [9  ,4  ],
+    [10 ,4  ],
+    [11 ,4  ],
+    [8  ,5  ],
+    [9  ,5  ],
+    [10 ,5  ],
+    [11 ,5  ],
+    [9  ,6  ],
+    [10 ,6  ],
+    [11 ,6  ],
+    [8  ,7  ],
+    [9  ,7  ],
+    [10 ,7  ],
+    [11 ,7  ],
+    [8  ,8  ],
+    [9  ,8  ],
+    [10 ,8  ],
+    [11 ,8  ],
+    [9  ,9  ],
+    [10 ,9  ],
+    [11 ,9  ],
+    [10 ,10 ],
+    [11 ,10 ],
+    [7  ,3  ],
+    [8  ,3  ],
+    [9  ,3  ],
+    [10 ,3  ],
+    [11 ,3  ],
+    [5  ,2  ],
+    [4  ,2  ],
+    [3  ,2  ],
+    [2  ,2  ],
+    [6 ,6, 6, 6 ,6  ,2 ,2 ,2  ],        
+    [6 ,6, 6, 10, 10, 2, 3, 3 ],    
+    [8 ,8, 8, 6 ,6  ,2 ,2 ,3     ],
+    [8 ,8, 8, 6 ,5  ,2 ,2 ,3     ],
+    [8 ,8, 6, 6 ,5  ,2 ,2 ,3    ]]
+
+    for setting in settings:
+        get_results(setting, log_file)
+
+def test_vgg():
+    log_file = 'tmp/compress_vgg'
+    settings = [[5,3],
+    [4  ,3],
+    [4  ,2],
+    [8  ,5],
+    [8  ,6],
+    [6  ,4],
+    [6  ,3],
+    [5  ,4]]
+    for setting in settings:
+        get_results(setting, log_file)
+
+def test_lenet():
+    log_file = 'tmp/compress_lenet'
+    settings = [[5,3],
+    [4  ,3],
+    [4  ,2],
+    [8  ,5],
+    [8  ,6],
+    [6  ,4],
+    [6  ,3],
+    [5  ,4]]
+    for setting in settings:
+        get_results(setting, log_file)
+
+
+def test_lenet_300():
+    log_file = 'tmp/compress_lenet'
+    settings = [[5,10],
+    [4  ,8],
+    [4  ,6],
+    [8  ,4],
+    [8  ,3],
+    [6  ,2]]
+    for setting in settings:
+        get_results(setting, log_file)
+
+
+if __name__ == "__main__":
+    test_lenet()
