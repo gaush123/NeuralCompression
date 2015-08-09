@@ -2,7 +2,7 @@
 from utils import analyze_log, get_accuracy
 
 import os
-def test(bits=[6, 5], option='alexnet', file=''):
+def test(bits=[6, 5], option='vgg', file=''):
     conv_bits = bits[0]
     fc_bits = bits[1]
     if len(bits) == 2:
@@ -17,10 +17,10 @@ def test(bits=[6, 5], option='alexnet', file=''):
     with open(file, 'a+') as f:
         f.write('%d, %d, %f, %f, %f, %f\n' % (conv_bits, fc_bits, original_top1, original_top5, high_top1, high_top5))
 
-file_t = 'tmp/results_alexnet'
-test([4, 10], file=file_t)
-test([8, 8], file=file_t)
-test([8,6], file=file_t)
-test([6,4], file=file_t)
-test([6,3], file=file_t)
-test([5,2], file=file_t)
+file_t = 'tmp/results_vgg16'
+settings = [[5,3],
+[4, 3],
+[4, 2],
+[8, 5]]
+for setting in settings:
+    test(setting, file=file_t)

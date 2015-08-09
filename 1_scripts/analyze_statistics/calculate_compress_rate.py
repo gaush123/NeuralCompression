@@ -61,7 +61,7 @@ def analyze_comprate(net, layers, params_bits, location_bits=None, encoding='pac
 
 caffe.set_mode_gpu()
 caffe.set_device(1)
-option = 'lenet5'
+option = 'vgg'
 if option == 'lenet5':
     prototxt = '3_prototxt_solver/lenet5/train_val.prototxt'
     caffemodel = '4_model_checkpoint/lenet5/lenet5.caffemodel'
@@ -124,6 +124,12 @@ def get_results(choice=[4, 3], file_out=''):
         f.write('%d, %f, %f, %f\n' % (optimal_loc_bits, rate_min, codebook_ratio, params_ratio))
     return
 
+
+
+def test_alexnet_only_pruned():
+    setting = [32,32]
+    log_file = 'tmp/only_pruned'
+    get_results(setting, log_file)
 
 def test_alexnet():
     # print get_results(choice = map(lambda x:int(x), sys.argv[1:3]))
@@ -210,4 +216,4 @@ def test_lenet_300():
 
 
 if __name__ == "__main__":
-    test_lenet()
+    test_alexnet_only_pruned()
