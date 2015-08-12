@@ -125,6 +125,11 @@ def get_results(choice=[4, 3], file_out=''):
     return
 
 
+def teadfsgag():
+    asfdsagsa
+    dsafgasg
+    sdgasdgs
+
 def test_alexnet():
     # print get_results(choice = map(lambda x:int(x), sys.argv[1:3]))
     log_file = 'tmp/compress_alexnet'
