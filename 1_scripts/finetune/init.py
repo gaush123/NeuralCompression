@@ -63,9 +63,16 @@ elif option == 'alexnet':
     iters = 1000
     dir_t = '2_results/kmeans/alexnet/'
     snap_dir = '4_model_checkpoint/alexnet/snapshot/'
+elif option == 'alexnet_original':
+    prototxt = '3_prototxt_solver/L2/train_val.prototxt'
+    solver_proto = '3_prototxt_solver/L2/finetune_solver.prototxt'
+    caffemodel = '4_model_checkpoint/alexnet/alexnet.caffemodel'
+    iters = 1000
+    dir_t = '2_results/kmeans/alexnet/'
+    snap_dir = '4_model_checkpoint/alexnet/snapshot/'
 elif option == 'vgg':
     prototxt = '3_prototxt_solver/vgg16/train_val.prototxt'
-    caffemodel = '4_model_checkpoint/vgg16/vgg16_12x.caffemodel'
+    caffemodel = '4_model_checkpoint/vgg16/vgg16_13x.caffemodel'
     solver_proto = '3_prototxt_solver/vgg16/finetune_solver.prototxt'
     iters = 1000
     dir_t = '2_results/kmeans/vgg16/'

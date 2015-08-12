@@ -132,10 +132,20 @@ def update_codebook_net(net, codebook, codeDict, maskCode, args, update_layers=N
         step_cache = update_codebook_net.step_cache
         update_codebook_net.count += 1
 
-
     total_layers = net.params.keys()
     if update_layers is None:
         update_layers = total_layers
+
+    if args.snapshot == 'bias':
+        if update_codebook_net.count % 100 == 1:
+            bias = {}
+            for layer in total_layers:
+                bias[layer] = net.params[layer][1].data
+            pickle.dump(bias, open('2_results/kmeans/alexnet/bias_snapshot/bias%d' % update_codebook_net.count, 'w'))
+    elif args.snapshot == 'codebook':
+        if update_codebook_net.count % 100 == 1:
+            pickle.dump(codebook, open('2_results/kmeans/alexnet/codebook_snapshot/codebook%d' % update_codebook_net.count, 'w'))
+
 
     for layer in total_layers:
         if layer in update_layers:
@@ -175,12 +185,6 @@ def update_codebook_net(net, codebook, codeDict, maskCode, args, update_layers=N
 
     if args.timing:
         print "Update codebook time:%f" % (time.time() - start_time)
-
-    if args.snapshot == 'bias':
-        bias = {}
-        for layer in total_layers:
-            bias[layer] = net.params[layer][1].data
-        pickle.dump(bias, open('2_results/kmeans/alexnet/bias_snapshot/bias%d' % update_codebook_net.count, 'w'))
 
 
 def store_all(net, codebook, dir_t, idx=0):

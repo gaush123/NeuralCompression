@@ -61,7 +61,7 @@ def analyze_comprate(net, layers, params_bits, location_bits=None, encoding='pac
 
 caffe.set_mode_gpu()
 caffe.set_device(1)
-option = 'lenet5'
+option = 'vgg'
 if option == 'lenet5':
     prototxt = '3_prototxt_solver/lenet5/train_val.prototxt'
     caffemodel = '4_model_checkpoint/lenet5/lenet5.caffemodel'
@@ -72,7 +72,7 @@ elif option == 'alexnet':
     caffemodel = '4_model_checkpoint/alexnet/alexnet9x.caffemodel'
 elif option == 'vgg':
     prototxt = '3_prototxt_solver/vgg16/train_val.prototxt'
-    caffemodel = '4_model_checkpoint/vgg16/vgg16_12x.caffemodel'
+    caffemodel = '4_model_checkpoint/vgg16/vgg16_13x.caffemodel'
     solver_proto = '3_prototxt_solver/L2/finetune_solver.prototxt'
     snap_dir = '4_model_checkpoint/4_model_checkpoint/vgg16/snapshot/'
 elif option == 'lenet_300':
@@ -125,10 +125,45 @@ def get_results(choice=[4, 3], file_out=''):
     return
 
 
-def teadfsgag():
-    asfdsagsa
-    dsafgasg
-    sdgasdgs
+def test_alexnet_only_pruned():
+    setting = [32,32]
+    log_file = 'tmp/only_pruned'
+    get_results(setting, log_file)
+
+def calculate_rate(setting):
+    if len(setting) == 2:
+        setting_new = [setting[0]] * 5 + [setting[1]] * 3
+    else:
+        setting_new = setting
+    total_num = 0
+    new_num = 0
+    for idx, layer in enumerate(layers):
+        new_num += net.params[layer][0].data.size * setting_new[idx]
+        total_num += net.params[layer][0].data.size * 32
+
+    return float(new_num) / total_num
+
+def test_alexnet_only_quanzied():
+    settings = [[6  ,3  ],
+    [7  ,3  ],
+    [9  ,3  ],
+    [11 ,3  ],
+    [11 ,2  ],
+    [8  ,2  ],
+    [5  ,2  ],
+    [4  ,2  ],
+    [10,8, 8, 8, 8, 2, 3, 2    ],
+    [6 ,6, 6, 10, 10, 2, 3, 3  ],
+    [10,10, 8, 10, 10, 3, 2, 3 ],
+    [8 ,8, 8, 6 ,6  ,2 ,2 ,3   ],
+    [8 ,8, 8, 6 ,5  ,2 ,2 ,3   ],
+    [10,10, 8, 8 ,6  ,2 ,2 ,3   ],
+    [8 ,8, 6, 6 ,5  ,2 ,2 ,3   ]]
+    log_file = 'tmp/only_quantized'
+    with open(log_file, 'w') as f:
+        for setting in settings:
+            rate = calculate_rate(setting)
+            f.write('%f\n'%rate)
 
 def test_alexnet():
     # print get_results(choice = map(lambda x:int(x), sys.argv[1:3]))
@@ -184,7 +219,8 @@ def test_vgg():
     [8  ,6],
     [6  ,4],
     [6  ,3],
-    [5  ,4]]
+    [5  ,4],
+    [8  ,4]]
     for setting in settings:
         get_results(setting, log_file)
 
@@ -215,4 +251,4 @@ def test_lenet_300():
 
 
 if __name__ == "__main__":
-    test_lenet()
+    test_vgg()
