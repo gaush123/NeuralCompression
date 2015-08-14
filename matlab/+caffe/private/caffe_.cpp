@@ -301,6 +301,16 @@ static void net_forward(MEX_ARGS) {
   net->ForwardPrefilled();
 }
 
+// Usage: forward include data and accuracy
+static void net_forward_all(MEX_ARGS) {
+  mxCHECK(nrhs == 1 && mxIsStruct(prhs[0]),
+      "Usage: caffe_('net_forward_all', hNet)");
+  Net<float>* net = handle_to_ptr<Net<float> >(prhs[0]);
+  const vector< string > layers = net->layer_names();
+  net->ForwardFromTo(0, layers.size()-1);
+}
+
+
 // Usage: caffe_('net_backward', hNet)
 static void net_backward(MEX_ARGS) {
   mxCHECK(nrhs == 1 && mxIsStruct(prhs[0]),
@@ -497,6 +507,7 @@ static handler_registry handlers[] = {
   { "get_net",            get_net         },
   { "net_get_attr",       net_get_attr    },
   { "net_forward",        net_forward     },
+  { "net_forward_all",    net_forward_all },
   { "net_backward",       net_backward    },
   { "net_copy_from",      net_copy_from   },
   { "net_reshape",        net_reshape     },

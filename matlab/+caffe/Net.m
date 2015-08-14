@@ -87,6 +87,9 @@ classdef Net < handle
     function backward_prefilled(self)
       caffe_('net_backward', self.hNet_self);
     end
+    function forward_all(self)
+      caffe_('net_forward_all', self.hNet_self);
+    end
     function res = forward(self, input_data)
       CHECK(iscell(input_data), 'input_data must be a cell array');
       CHECK(length(input_data) == length(self.inputs), ...
