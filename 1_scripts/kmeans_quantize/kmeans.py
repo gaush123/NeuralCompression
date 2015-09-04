@@ -176,7 +176,6 @@ def main(choice=[64, 16], snapshot=False):
     quantize_net(net, codebook)
 
 # Evaluate the new model's accuracy
-'''
     net.save(caffemodel + '.quantize')
     command = caffe_root + "/build/tools/caffe test --model=" + prototxt + " --weights=" + caffemodel + ".quantize --iterations=%d --gpu 1 2>"%iters +log + "new"
     #print command
@@ -187,7 +186,6 @@ def main(choice=[64, 16], snapshot=False):
     top_1,top_5 = parse_caffe_log(log + 'new')
     with open('results_%s'%option,'a+') as f:
         f.write('%d %d \n%f\n%f\n'%(choice[0], choice[1], top_1, top_5))
-'''
 
 def main2():
     net = caffe.Net(prototxt, caffemodel, caffe.TEST)
@@ -230,9 +228,9 @@ if __name__ == "__main__":
     main([256,8])
     main([64,8])
     main([64,16])
-    main([256,16])
     main2()
     '''
+    main([256,16])
     # main([64,16])
     # print test_quantize_accu([3], ['conv5'], alpha=1.0)
-    test_weighted_kmeans()
+    # test_weighted_kmeans()
