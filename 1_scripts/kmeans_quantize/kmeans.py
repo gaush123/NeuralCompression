@@ -107,6 +107,30 @@ def stochasitc_quantize2(W, codebook):
 
     return codes.astype(np.int)
 
+def get_codes(net, codebook):
+    layers = codebook.keys()                                          
+    codes_W = {}
+    codes_b = {}
+    print "================Perform quantization=============="        
+    for layer in layers:                                              
+        print "Quantize layer:", layer                                
+        W = net.params[layer][0].data                                 
+        b = net.params[layer][1].data   
+        codes, _ = scv.vq(W.flatten(), codebook[layer])           
+        codes = np.reshape(codes, W.shape)             
+        codes_W[layer] = np.array(codes, dtype=np.uint32)
+        W_q = np.reshape(codebook[layer][codes], W.shape)
+        np.copyto(net.params[layer][0].data, W_q)
+
+        codes, _ = scv.vq(b.flatten(), codebook[layer])           
+        codes = np.reshape(codes, b.shape)             
+        codes_b[layer] = np.array(codes, dtype=np.uint32)
+        b_q = np.reshape(codebook[layer][codes], b.shape)
+        np.copyto(net.params[layer][1].data, b_q)
+
+    return codes_W, codes_b
+
+
 def quantize_net(net, codebook, use_stochastic=False):
     layers = codebook.keys()
     print "================Perform quantization=============="
@@ -172,11 +196,12 @@ def main(choice=[64, 16], snapshot=False):
     else:
         codebook = kmeans_net(net, layers, num_c, snapshot=False)
 
-    pickle.dump(codebook, open(dir_t + 'codebook.pkl', 'w'))
-    quantize_net(net, codebook)
-
 # Evaluate the new model's accuracy
-    net.save(caffemodel + '.quantize')
+    pickle.dump(codebook, open(caffe_root + 'codebook.pkl', 'w'))
+    net.save(caffe_root + caffemodel + '.quantize')
+    codes_W, codes_b = get_codes(net, codebook)
+    pickle.dump(codes_W, open('codes.pkl','wb'))
+    pickle.dump(codes_b, open('codes_b.pkl','wb'))
     command = caffe_root + "/build/tools/caffe test --model=" + prototxt + " --weights=" + caffemodel + ".quantize --iterations=%d --gpu 1 2>"%iters +log + "new"
     #print command
     print choice
