@@ -3,16 +3,23 @@
 # thresh_list=(0.46 0.72 1.05 1.27 1.44 1.58 1.70 1.81 1.91 2.00)
 # thresh_list=(0 0.25 0.69 1.06 1.35 1.59 1.80 1.99 2.16 2.32)
 # thresh_list=(0.08 2.32 2.64 3.38)
-thresh_list=(0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9)
-folder=L2_conv
-# suffix="678half"
-suffix="all"
-#suffix_2="layerwise_"
+# thresh_list=(0.21 0.22 0.23 0.24 0.25 0.26 0.27 0.28 0.29 0.30 0.31 0.32 0.33 0.34)
+# thresh_list=(0.72 0.73 0.74 0.75 0.76 0.77 0.78 0.79 )
+# thresh_list=(1.0 1.01 1.02 1.03 1.04 1.05 1.06 1.07 1.08 1.09 1.1)
+thresh_list=(0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0 1.1 1.2 1.3 1.4 1.5 1.6 1.7 1.8 1.9 2.0)
+thresh_list=(1.7 1.8 1.9 2.0)
+folder=L2
+suffix="fc7"
+suffix_2="afterConv8x_"
+# suffix="all"
+# suffix_2="layerwise_" 
 # suffix_2="alex_pruned_"
-suffix_2="conv_all_"
+# suffix_2='alex_pruned_afterConv_'
+# suffix_2="afterConv7x_"
+
 
 model="$CAFFE_ROOT/3_prototxt_solver/$folder/train_val.prototxt"
-output="$CAFFE_ROOT/2_results/$folder/acc_before_retrain_$suffix.csv"
+output="$CAFFE_ROOT/2_results/$folder/acc_before_retrain_$suffix_2$suffix.csv"
 filename_prefix="$CAFFE_ROOT/4_model_checkpoint/1_before_retrain/$folder/$suffix_2"
 rm -rf $output
 
@@ -48,10 +55,10 @@ do
 	filename2=$filename_prefix$data2"_$suffix.caffemodel"		
 	filename3=$filename_prefix$data3"_$suffix.caffemodel"		
 	filename4=$filename_prefix$data4"_$suffix.caffemodel"		
-	echo $result1
-	echo $result2
-	echo $result3
-	echo $result4
+# 	echo $result1
+# 	echo $result2
+# 	echo $result3
+# 	echo $result4
 	echo $filename1
 	echo $filename2
 	echo $filename3
@@ -60,7 +67,7 @@ do
 	rm -rf $tmp2
 	rm -rf $tmp3
 	rm -rf $tmp4
-	echo ./build/tools/caffe test --model=$model --weights=$filename1  --iterations=1000 -gpu 1 
+	echo $CAFFE_ROOT/build/tools/caffe test --model=$model --weights=$filename1  --iterations=1000 -gpu 0 
 	echo $CAFFE_ROOT/build/tools/caffe test --model=$model --weights=$filename2  --iterations=1000 -gpu 1 
 	echo $CAFFE_ROOT/build/tools/caffe test --model=$model --weights=$filename3  --iterations=1000 -gpu 2 
 	echo $CAFFE_ROOT/build/tools/caffe test --model=$model --weights=$filename4  --iterations=1000 -gpu 3 
@@ -93,9 +100,10 @@ do
 	echo $result4 >> $output
 
 done
+cat $output
 
-sort $output  > $tmp1 
-cat $tmp1> $output 
+# sort $output  > $tmp1 
+# cat $tmp1> $output 
 
 rm -rf $tmp1
 rm -rf $tmp2
