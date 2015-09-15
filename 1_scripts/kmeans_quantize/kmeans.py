@@ -122,13 +122,7 @@ def get_codes(net, codebook):
         W_q = np.reshape(codebook[layer][codes], W.shape)
         np.copyto(net.params[layer][0].data, W_q)
 
-        codes, _ = scv.vq(b.flatten(), codebook[layer])           
-        codes = np.reshape(codes, b.shape)             
-        codes_b[layer] = np.array(codes, dtype=np.uint32)
-        b_q = np.reshape(codebook[layer][codes], b.shape)
-        np.copyto(net.params[layer][1].data, b_q)
-
-    return codes_W, codes_b
+    return codes_W
 
 
 def quantize_net(net, codebook, use_stochastic=False):
@@ -198,10 +192,9 @@ def main(choice=[64, 16], snapshot=False):
 
 # Evaluate the new model's accuracy
     pickle.dump(codebook, open(caffe_root + 'codebook.pkl', 'w'))
+    codes_W= get_codes(net, codebook)
     net.save(caffe_root + caffemodel + '.quantize')
-    codes_W, codes_b = get_codes(net, codebook)
     pickle.dump(codes_W, open('codes.pkl','wb'))
-    pickle.dump(codes_b, open('codes_b.pkl','wb'))
     command = caffe_root + "/build/tools/caffe test --model=" + prototxt + " --weights=" + caffemodel + ".quantize --iterations=%d --gpu 1 2>"%iters +log + "new"
     #print command
     print choice

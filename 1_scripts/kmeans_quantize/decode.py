@@ -29,7 +29,7 @@ caffe.set_mode_cpu()
 net = caffe.Net(prototxt, caffe.TEST)
 layers = filter(lambda x:'conv' in x or 'fc' in x or 'ip' in x, net.params.keys())
 
-fin = fopen(net_bin, 'rb')
+fin = open(net_bin, 'rb')
 
 def binary_to_net(weights, spm_stream, ind_stream, codebook, num_nz):
     bits = np.log2(codebook.size)
@@ -46,12 +46,13 @@ def binary_to_net(weights, spm_stream, ind_stream, codebook, num_nz):
     spm = np.zeros(num_nz, np.uint8)
     ind = np.zeros(num_nz, np.uint8)
     if slots == 2:
-        spm[np.arange(0, num_nz, 2)] = spm_stream / (2**4)
-        spm[np.arange(1, num_nz, 2)] = spm_stream % (2**4)
+        spm[np.arange(0, num_nz, 2)] = spm_stream % (2**4)
+        spm[np.arange(1, num_nz, 2)] = spm_stream / (2**4)
     else:
         spm = spm_stream
-    ind[np.arange(0, num_nz, 2)] = spm_stream / (2**4)
-    ind[np.arange(1, num_nz, 2)] = spm_stream % (2**4)
+    ind[np.arange(0, num_nz, 2)] = ind_stream% (2**4)
+    ind[np.arange(1, num_nz, 2)] = ind_stream/ (2**4)
+
 
     # Recover the matrix
     ind = np.cumsum(ind+1)-1
@@ -61,6 +62,8 @@ def binary_to_net(weights, spm_stream, ind_stream, codebook, num_nz):
 
 nz_num = np.fromfile(fin, dtype = np.uint32, count = len(layers))
 for idx, layer in enumerate(layers):
+    print "Reconstruct layer", layer
+    print "Total Non-zero number:", nz_num[idx]
     if 'conv' in layer:
         bits = 8
     else:
@@ -70,9 +73,9 @@ for idx, layer in enumerate(layers):
     bias = np.fromfile(fin, dtype = np.float32, count = net.params[layer][1].data.size)
     np.copyto(net.params[layer][1].data, bias)
 
-    spm_stream = np.fromfile(fin, dtype = np.uint8, count = (nz_num-1) / (8/bits) + 1)
-    ind_stream = np.fromfile(fin, dtype = np.uint8, count = (nz_num-1) / 2+1)
+    spm_stream = np.fromfile(fin, dtype = np.uint8, count = (nz_num[idx]-1) / (8/bits) + 1)
+    ind_stream = np.fromfile(fin, dtype = np.uint8, count = (nz_num[idx]-1) / 2+1)
 
-    binary_to_net(net.params[layer][0].data, spm_stream, ind_stream, bits)
+    binary_to_net(net.params[layer][0].data, spm_stream, ind_stream, codebook, nz_num[idx])
 
 net.save(target)

@@ -74,13 +74,18 @@ for idx, layer in enumerate(layers):
     nz_num[idx] = total_slot
     spm_tmp[idx_vec] = W[loc]
     ind_tmp[idx_vec] = distance_loc % max_jump
+    print layer
+    if idx == 0:
+        print ind_tmp[:40]
 
     spm_stream[idx] = to_binary(spm_tmp[:total_slot], codebook[layer].size)
     ind_stream[idx] = to_binary(ind_tmp[:total_slot], max_jump)
 
 nz_num.tofile(fout)
 for idx, layer in enumerate(layers):
-    codebook[layer].tofile(fout)
+    codebook[layer].astype(np.float32).tofile(fout)
+    print codebook[layer][:20]
+    print codebook[layer].astype(np.float32)[:20]
     net.params[layer][1].data.tofile(fout)
     spm_stream[idx].tofile(fout)
     ind_stream[idx].tofile(fout)
