@@ -13,7 +13,7 @@ import caffe
 
 
 caffe.set_mode_cpu()
-option = 'alexnet'
+option = 'vgg'
 if option == 'lenet5':
     prototxt = '3_prototxt_solver/lenet5/train_val.prototxt'
     caffemodel = '4_model_checkpoint/lenet5/lenet5.caffemodel'
@@ -26,7 +26,7 @@ elif option == 'alexnet':
     dir_t = '2_results/kmeans/alexnet/'
 elif option == 'vgg':
     prototxt = '3_prototxt_solver/vgg16/train_val.prototxt'
-    caffemodel = '4_model_checkpoint/vgg16/vgg16_12x.caffemodel'
+    caffemodel = '4_model_checkpoint/vgg16/vgg16_13x.caffemodel'
     iters = 1000
     dir_t = '2_results/kmeans/vgg16/'
 
@@ -45,7 +45,7 @@ def GetProbability(array):
     probs = map(lambda x:float(x) / len(array), probs)
     return probs
 
-def HuffmaneEncode(probs):
+def HuffmanEncode(probs):
     num = len(probs)
     codes = [0] * num
     code_lengths = [0] * num
@@ -53,21 +53,19 @@ def HuffmaneEncode(probs):
     sub_groups_prob = list(probs)
 
     def find_min2(array):
-        min1 = 1.1
-        idx1 = 0
-        for i in range(len(array)):
-            if array[i] < min1:
-                idx2 = idx1
-                min2 = min1
-                idx1 = i
-                min1 = array[i]
+        min1 = min(array)
+        idx1 = array.index(min1)
+        array[idx1] = 1.0
+        min2 = min(array)
+        idx2 = array.index(min2)
+        array[idx1] = min1
 
         return idx1, idx2
 
     def append_codes(bit, idxs, codes, code_lengths):
         for idx in idxs:
-            codes[i] = codes[i] * 2 + bit
-            code_lengths[i] += 1
+            codes[idx] = codes[idx] * 2 + bit
+            code_lengths[idx] += 1
 
     for i in range(num - 1):
         min_1, min_2 = find_min2(sub_groups_prob)
@@ -75,13 +73,12 @@ def HuffmaneEncode(probs):
         append_codes(0, sub_groups[min_1], codes, code_lengths)
         append_codes(1, sub_groups[min_2], codes, code_lengths)
 
-        sub_groups.append(sub_groups[min_1] + sub_groups[min_2])
-        del sub_groups[min_1]
+        sub_groups[min_1] = sub_groups[min_1] + sub_groups[min_2]
         del sub_groups[min_2]
 
-        sub_groups_prob.append(sub_groups_prob[min_1] + sub_groups_prob[min_2])
-        del sub_groups_prob[min_1]
+        sub_groups_prob[min_1] = sub_groups_prob[min_1] + sub_groups_prob[min_2]
         del sub_groups_prob[min_2]
+
 
     return codes, code_lengths 
 
@@ -94,37 +91,45 @@ def ArrayToCode(array, codes, code_lengths):
 
     idx = 0
     shift = 0
-    for number in array:
+    for i in range(len(array)):
+        number = array[i]
         length = code_lengths[number]
         code = codes[number]
         while length > 0:
             eff = min(length, 32-shift)
             bits_to_write = code & ((1 << eff) - 1)
+            if idx == total_4bytes:
+                print i
+                import IPython
+                IPython.embed()
             compressed_codes[idx] += bits_to_write << shift
 
             code = code >> eff
             length -= eff
             idx += (shift + eff) / 32
-            shift += (shift + eff) % 32
+            shift = (shift + eff) % 32
 
     assert idx * 32 + shift == total_length  # For debug
 
     return compressed_codes, total_length
 
-def Decode(compressed_codes, total_length, codes, original_length):
-    array = np.array(original_length, dtype = np.uint8)
+def Decode(compressed_codes, total_length, codes, code_lengths, original_length):
+    array = np.zeros(original_length, dtype = np.uint8)
 
     key = 0
     length = 0
     num = 0
+    huff_quick_loc = map(lambda x: codes[x] + 2 ** code_lengths[x],
+        range(len(codes)))
     for i in range(total_length):
         idx = i / 32
         shift = i % 32
         bit = (compressed_codes[idx] >> shift) & 0x1
-        key += (2 ** length) * bit
+        key += (1 << length) * bit
         length += 1
-        if key in codes:
-            array[num] = codes.index(key)
+        quick_loc = key + (1 << length)
+        if quick_loc in huff_quick_loc:
+            array[num] = huff_quick_loc.index(quick_loc)
             num += 1
             key = 0
             length = 0
@@ -157,9 +162,9 @@ for idx, layer in enumerate(layers):
     ind.append(ind_tmp[:total_slot])
 
     probs = GetProbability(spm[idx])
-    codes, code_lengths = HuffmaneEncode(probs)
-    compressed_codes, total_length = ArrayToCode(spm[idx])
-    recovered_array = Decode(compressed_codes, total_length, codes, len(spm[idx]))
+    codes, code_lengths = HuffmanEncode(probs)
+    compressed_codes, total_length = ArrayToCode(spm[idx], codes, code_lengths)
+    recovered_array = Decode(compressed_codes, total_length, codes, code_lengths, len(spm[idx]))
 
     assert np.sum(recovered_array - spm[idx]) == 0
     sys.exit(0)

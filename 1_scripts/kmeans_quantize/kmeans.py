@@ -21,7 +21,7 @@ import caffe
 
 caffe.set_mode_gpu()
 caffe.set_device(0)
-option = 'alexnet'
+option = 'vgg'
 if option == 'lenet5':
     prototxt = '3_prototxt_solver/lenet5/train_val.prototxt'
     caffemodel = '4_model_checkpoint/lenet5/lenet5.caffemodel'
@@ -34,7 +34,7 @@ elif option == 'alexnet':
     dir_t = '2_results/kmeans/alexnet/'
 elif option == 'vgg':
     prototxt = '3_prototxt_solver/vgg16/train_val.prototxt'
-    caffemodel = '4_model_checkpoint/vgg16/vgg16_12x.caffemodel'
+    caffemodel = '4_model_checkpoint/vgg16/vgg16_13x.caffemodel'
     iters = 1000
     dir_t = '2_results/kmeans/vgg16/'
 

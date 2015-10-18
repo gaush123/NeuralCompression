@@ -31,7 +31,7 @@ def to_binary(array, types):
 
 
 caffe.set_mode_cpu()
-option = 'alexnet'
+option = 'vgg'
 if option == 'lenet5':
     prototxt = '3_prototxt_solver/lenet5/train_val.prototxt'
     caffemodel = '4_model_checkpoint/lenet5/lenet5.caffemodel'
@@ -84,8 +84,6 @@ for idx, layer in enumerate(layers):
 nz_num.tofile(fout)
 for idx, layer in enumerate(layers):
     codebook[layer].astype(np.float32).tofile(fout)
-    print codebook[layer][:20]
-    print codebook[layer].astype(np.float32)[:20]
     net.params[layer][1].data.tofile(fout)
     spm_stream[idx].tofile(fout)
     ind_stream[idx].tofile(fout)

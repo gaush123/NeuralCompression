@@ -74,7 +74,7 @@ idx = 1
 [a, i_ori] = sort(-final_out(:,idx));
 i_new(1:5)'
 i_ori(1:5)'
-ground_truth
+ground_truth+1
 display('=================================\n')
 
 fprintf(file, '%d %d %d %d %d\n', i_new(1:5));
