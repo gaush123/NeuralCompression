@@ -1,7 +1,7 @@
 
 
 model = '3_prototxt_solver/L2/train_val_batch_1.prototxt';
-weights = '4_model_checkpoint/alexnet/alexnet9x.caffemodel.quantize';
+weights = '4_model_checkpoint/alexnet/alexnet9x.caffemodel';
 caffe.set_mode_gpu()
 net = caffe.Net(model, weights, 'test');
 

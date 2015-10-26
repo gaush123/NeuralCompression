@@ -7,7 +7,7 @@ net = caffe.Net(model, weights, 'test');
 
 layers = {'fc6', 'fc7', 'fc8'};
 act_fraclen = [6, 5, 4, 0]; % For 16-bit
-% act_fraclen32 = [19, 18, 17, 13]; % For 16-bit
+act_fraclen32 = [19, 18, 17, 13]; % For 16-bit
 
 w = containers.Map
 act = containers.Map
@@ -22,7 +22,7 @@ F.SumWordLength = wordlen;
 
 
 for idx = 1:length(layers)
-    F.ProductFractionLength=act_fraclen(idx+1);
+    F.ProductFractionLength=act_fraclen32(idx+1);
     F.SumFractionLength = act_fraclen(idx+1);
 
     layer = layers{idx};
@@ -39,7 +39,7 @@ file = fopen('fixed.log','w');
 true_original = 0;
 true_quantized = 0;
 
-for times = 1:500
+for times = 1:1000
 
 net.forward_all()
 ground_truth = net.blobs('label').get_data();
@@ -53,7 +53,7 @@ for idx = 1:length(layers)
     layer = layers{idx};
     display(layer)
 
-    F.ProductFractionLength=act_fraclen(idx+1);
+    F.ProductFractionLength=act_fraclen32(idx+1);
     F.SumFractionLength = act_fraclen(idx+1);
     act_ = fi(act_, F);
 
@@ -74,7 +74,7 @@ idx = 1
 [a, i_ori] = sort(-final_out(:,idx));
 i_new(1:5)'
 i_ori(1:5)'
-ground_truth+1
+ground_truth
 display('=================================\n')
 
 fprintf(file, '%d %d %d %d %d\n', i_new(1:5));

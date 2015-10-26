@@ -144,8 +144,11 @@ max_jump = 2 ** ind_codes
 nz_num = np.zeros(len(layers), np.uint32)
 spm = []
 ind = []
+import time
+start_time = time.time()
 for idx, layer in enumerate(layers):
     print "Deal with layer:", layer
+    print "%f seconds elapse"%(time.time() - start_time)
     W = codes_W[layer].flatten()
     spm_tmp = np.zeros(W.size, dtype = np.uint16)
     ind_tmp = np.ones(W.size, dtype = np.uint16) * (max_jump-1)
@@ -167,7 +170,13 @@ for idx, layer in enumerate(layers):
     recovered_array = Decode(compressed_codes, total_length, codes, code_lengths, len(spm[idx]))
 
     assert np.sum(recovered_array - spm[idx]) == 0
-    sys.exit(0)
+    probs = GetProbability(ind[idx])
+    codes, code_lengths = HuffmanEncode(probs)
+    compressed_codes, total_length = ArrayToCode(ind[idx], codes, code_lengths)
+    recovered_array = Decode(compressed_codes, total_length, codes, code_lengths, len(ind[idx]))
+
+    assert np.sum(recovered_array - ind[idx]) == 0
+
 
 '''
 nz_num.tofile(fout)
