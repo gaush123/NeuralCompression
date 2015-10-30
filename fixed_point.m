@@ -2,12 +2,19 @@
 
 model = '3_prototxt_solver/L2/train_val_batch_1.prototxt';
 weights = '4_model_checkpoint/alexnet/alexnet9x.caffemodel.quantize';
-caffe.set_mode_gpu()
+caffe.set_mode_cpu()
 net = caffe.Net(model, weights, 'test');
 
 layers = {'fc6', 'fc7', 'fc8'};
-act_fraclen = [6, 5, 4, 0]; % For 16-bit
-act_fraclen32 = [19, 18, 17, 13]; % For 16-bit
+
+%act_fraclen = [6, 5, 4, 0]; % For 16-bit, no-kmeans
+%act_fraclen32 = [19, 18, 17, 13]; % For 16-bit, no-kmeans
+
+%act_fraclen = [7, 3, 3, -2]; % For 16-bit, kmeans
+%act_fraclen32 = act_fraclen + 14; % For 16-bit, kmeans
+
+act_fraclen = [7, 3, 3, -2] - 8; % For 8-bit, kmeans
+act_fraclen32 = act_fraclen + 8; % For 8-bit, kmeans
 
 w = containers.Map
 act = containers.Map
@@ -29,11 +36,14 @@ for idx = 1:length(layers)
     w_ = net.params(layer,1).get_data();
     max_w = max(abs(w_(:)));
     w_ = w_ / max_w;
+    %net.params(layer,1).set_data(w_);
     bias_ = net.params(layer, 2).get_data() / max_w;
     w(layer) = fi(w_, 1, wordlen, fraclen, F);
     bias(layer) = fi(bias_, 1, wordlen, fraclen, F);
+    %net.params(layer,2).set_data(bias_);
 end
 
+%net.save(strcat(weights, '.normalize'));
 file = fopen('fixed.log','w');
 
 true_original = 0;
